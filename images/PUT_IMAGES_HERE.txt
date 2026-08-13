@@ -1,0 +1,16 @@
+이 폴더에 PNG 7장이 들어갑니다.
+
+  bash download-assets.sh
+
+로 자동으로 받거나, 채팅에서 직접 내려받아 아래 이름 그대로 넣으세요.
+
+  earth.png
+  village-kr.png
+  village-us.png
+  village-de.png
+  village-vn.png
+  village-br.png
+  village-in.png
+
+이 폴더가 비어 있어도 index.html은 동작합니다 — 로컬 파일이 없으면
+CDN 원본으로 자동 대체됩니다. (오프라인 데모라면 받아두세요.)
