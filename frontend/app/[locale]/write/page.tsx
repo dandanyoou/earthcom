@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 
-import { AppShell } from "@/components/shell/app-shell";
+import { NightScreen } from "@/components/feature/world/night-screen";
 import { WriteScreen } from "@/components/screens/write-screen";
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
@@ -8,8 +8,8 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   setRequestLocale(locale);
 
   return (
-    <AppShell activeTab="signals">
+    <NightScreen activeTab="signals">
       <WriteScreen />
-    </AppShell>
+    </NightScreen>
   );
 }

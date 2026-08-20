@@ -218,7 +218,7 @@ export function WriteScreen({ signalId }: { signalId?: string } = {}) {
   return (
     <div style={{ paddingBottom: 28 }}>
       <ScreenHeader
-        onBack={() => router.push(signalId ? `/signals/${signalId}` : "/home")}
+        onBack={() => router.push(signalId ? `/signals/${signalId}` : "/world")}
         subtitle={t(signalId ? "write.editSubtitle" : "write.subtitle")}
         title={t(signalId ? "write.editTitle" : "write.title")}
       />
