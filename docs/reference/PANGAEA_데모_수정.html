@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PANGAEA — 데모</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css">
+<style>
+/* ===================================================================
+   PANGAEA 데모 최종본
+   - 개발 내부 용어(L1/L3/M8/degraded/모듈명) 전부 제거
+   - 밝은 톤 전환: 흰 배경 + 회색 위계 + 브랜드 1색 (국내 커뮤니티 앱 관례)
+   - 대비 전 항목 WCAG AA 통과
+   =================================================================== */
+:root{
+  --bg:#FFFFFF; --bg2:#F7F8FA; --bg3:#FDF4E7;
+  --line:#EDEFF3; --line2:#DFE3EA;
+  --t1:#191F28;   /* 16.6 */
+  --t2:#4E5968;   /* 7.11 */
+  --t3:#6B7684;   /* 4.62 */
+  /* 브랜드 = 잉크. 제안서 --ink(#12233F)를 승격시킨 색이다.
+     대비 15.8이라 어떤 포인트 색과도 부딪히지 않고, 오히려 포인트 색을 살린다. */
+  --brand:#17223A;      /* 버튼·주요 액션 — 15.83 */
+  --brand-l:#26364F;    /* 보조·테두리 — 12.19 */
+  /* 신뢰 온도 전용 따뜻한 색. 온도계는 따뜻해야 하므로 브랜드에서 분리했다. */
+  --temp:#B4571E;       /* 온도 숫자 — 4.86 */
+  --temp-bar:#E08A2E;   /* 온도 바 채움 — 배경 전용 */
+  --ok:#1C7A6E;   --ok-bg:#E7F4F1;
+  --info:#1F4E96; --info-bg:#EAF1FB;
+  --warn:#A05F0E; --warn-bg:#FDF3E2;
+  --dgr:#C0392B;  --dgr-bg:#FDECEA;
+  --kr:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+button{font:inherit;border:none;background:none;cursor:pointer;color:inherit;text-align:left}
+body{background:#EEF0F4; color:var(--t1); font-family:var(--kr); word-break:keep-all;
+  -webkit-font-smoothing:antialiased; min-height:100vh; padding:30px 24px 56px}
+.stage{max-width:660px; margin:0 auto; display:grid; grid-template-columns:200px 400px; gap:26px; align-items:start}
+
+/* 데모 진행용 화면 목록 */
+.idx{position:sticky; top:26px}
+.idx .t{font-size:11px; font-weight:700; color:var(--t3); letter-spacing:.02em; margin-bottom:9px}
+.idx button{display:block; width:100%; padding:9px 11px; border-radius:9px; font-size:13px;
+  font-weight:600; color:var(--t2); margin-bottom:2px}
+.idx button:hover{background:#E4E7EC}
+.idx button.on{background:var(--t1); color:#fff}
+.idx .n{font-family:var(--mono); font-size:10px; opacity:.55; margin-right:7px}
+
+/* 폰 */
+.phone{width:400px; height:820px; background:#111; border-radius:48px; padding:8px;
+  box-shadow:0 22px 60px rgba(25,31,40,.24)}
+.scr{width:100%; height:100%; border-radius:40px; overflow:hidden; background:var(--bg);
+  display:flex; flex-direction:column; position:relative}
+.sb{height:42px; flex:none; display:flex; justify-content:space-between; align-items:flex-end;
+  padding:0 24px 4px; font-family:var(--mono); font-size:11px; color:var(--t2)}
+.vw{flex:1; overflow-y:auto; scrollbar-width:none; padding-bottom:92px}
+.vw::-webkit-scrollbar{display:none}
+.pg{display:none} .pg.on{display:block; animation:in .3s cubic-bezier(.22,.9,.3,1)}
+#p-chat{padding-bottom:74px}   /* 하단 입력창(63px) 위로 확인 패널이 올라오도록 */
+@keyframes in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.tabs{position:absolute; bottom:0; left:0; right:0; height:68px; background:rgba(255,255,255,.95);
+  backdrop-filter:blur(12px); border-top:1px solid var(--line); display:flex; padding:7px 6px 15px; z-index:40}
+.tabs button{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding-top:4px;
+  font-size:9.5px; font-weight:600; color:var(--t3)}
+.tabs button.on{color:var(--brand); font-weight:700}
+.tabs .i{display:flex; align-items:center; justify-content:center; height:19px}
+.tabs .i svg{width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round}
+.hi{position:absolute; bottom:5px; left:50%; transform:translateX(-50%); width:118px; height:4px;
+  background:rgba(25,31,40,.2); border-radius:3px; z-index:50}
+
+/* 공통 */
+.px{padding:0 20px}
+.mono{font-family:var(--mono)}
+.cap{font-size:11.5px; color:var(--t3)}
+.h1{font-size:23px; font-weight:700; letter-spacing:-.035em; line-height:1.32}
+.h2{font-size:17px; font-weight:700; letter-spacing:-.02em}
+.sec{font-size:15.5px; font-weight:700; letter-spacing:-.02em; margin:22px 0 11px}
+/* 섹션끼리 붙어 보이지 않게 두꺼운 회색 띠로 끊는다 (국내 앱 관례) */
+.gap{height:8px; background:var(--bg2); margin:24px -20px 0}
+/* 국가 코드 배지 — 국기 이모지는 Windows에서 "DE"·"JP" 글자로 깨진다 */
+.cc{display:inline-block; padding:1px 5px; border-radius:4px; background:var(--bg2);
+  color:var(--t3); font-size:10px; font-weight:700; letter-spacing:.05em; vertical-align:1px}
+.sec small{font-family:var(--mono); font-size:11px; color:var(--t3); font-weight:400; margin-left:6px}
+.chip{display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px;
+  font-size:10.5px; font-weight:700; white-space:nowrap}
+.chip.ok{background:var(--ok-bg); color:var(--ok)}
+.chip.info{background:var(--info-bg); color:var(--info)}
+.chip.warn{background:var(--warn-bg); color:var(--warn)}
+.chip.dgr{background:var(--dgr-bg); color:var(--dgr)}
+.chip.gray{background:var(--bg2); color:var(--t3)}
+.chip.line{background:none; border:1px dashed var(--line2); color:var(--t3); font-weight:600}
+/* 버튼 — 모든 변형이 같은 높이가 되도록 투명 테두리를 기본값에 둔다 */
+.btn{display:block; width:100%; padding:13px 0; border-radius:11px; text-align:center;
+  font-size:14.5px; font-weight:700; letter-spacing:-.015em;
+  background:var(--brand); color:#fff; border:1.5px solid transparent; transition:transform .14s}
+.btn:active{transform:scale(.985)}
+/* 주의: 보조 버튼 이름을 .sec로 쓰면 섹션 제목 규칙(.sec)과 충돌해 margin이 붙는다 */
+.btn.ghost{background:#fff; border-color:var(--line2); color:var(--t1)}
+.btn.sm{padding:10px 0; font-size:13px; border-radius:9px}
+.btn[disabled]{background:var(--line); border-color:transparent; color:var(--t3); pointer-events:none}
+.pair{display:flex; gap:8px} .pair>*{flex:1 1 0; min-width:0}
+.row{display:flex; align-items:center; gap:11px; padding:13px 0; border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.av{width:42px;height:42px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-weight:700; font-size:13.5px; color:#fff}
+/* 아바타 색 — 의미색(청록=검증됨 / 갈색=브랜드 / 파랑=AI)과 겹치지 않는 중립 세트.
+   전부 흰 글자 대비 4.9 이상. 사람 색은 의미가 없어야 하므로 채도를 낮췄다. */
+.av1{background:#5A6980} .av2{background:#75587A} .av3{background:#5F7360}
+.av4{background:#54608C} .av5{background:#6E7076} .av6{background:#8E959E}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:none}
+.dot.off{background:#C6CCD4} .dot.slp{background:#DDE1E6}
+
+/* 홈 */
+.temp{display:flex; align-items:flex-end; gap:12px; margin-top:14px; padding:13px 14px;
+  background:var(--bg2); border-radius:14px}
+/* span은 inline이라 height가 무시된다 — 바 요소는 반드시 block으로 */
+.temp .v{font-family:var(--mono); font-size:27px; color:var(--temp); line-height:.9; letter-spacing:-.03em}
+.temp .m{flex:1; padding-bottom:2px; display:block; min-width:0}
+.temp .l{display:block; font-size:11.5px; color:var(--t2); font-weight:600}
+/* 이름을 .bar로 두면 상단 앱바(.bar)의 padding이 먹어서 높이가 무너진다 */
+.temp .tbar{display:block; height:7px; border-radius:4px; background:#DCE0E6; margin-top:8px; overflow:hidden}
+.temp .tfill{display:block; height:100%; width:62%; background:var(--temp-bar); border-radius:4px}
+.temp .go{font-size:11.5px; color:var(--t3); padding-bottom:2px}
+.ask{display:block; width:100%; margin-top:11px; padding:16px; border-radius:15px;
+  border:1.5px solid var(--line2); background:#fff}
+.ask .q{font-size:15.5px; font-weight:700; line-height:1.5; letter-spacing:-.02em}
+.ask .s{font-size:12px; color:var(--t3); margin-top:8px}
+.ask .c{display:flex; align-items:center; gap:8px; margin-top:14px; padding-top:13px; border-top:1px solid var(--line)}
+.ask .sp{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.ask .c b{font-size:12px; color:var(--brand); font-weight:700}
+.find{display:flex; align-items:center; gap:9px; width:100%; margin-top:9px; padding:13px 15px;
+  background:var(--bg2); border-radius:12px; font-size:13.5px; color:var(--t3)}
+.kinds{display:flex; gap:6px; margin-top:12px}
+.kinds button{padding:7px 13px; border-radius:20px; font-size:12.5px; font-weight:600;
+  color:var(--t2); background:var(--bg2)}
+.kinds button.on{background:var(--t1); color:#fff; font-weight:700}
+.strip{display:flex; overflow-x:auto; scrollbar-width:none; margin:0 -20px; padding:0 20px}
+.strip::-webkit-scrollbar{display:none}
+.city{flex:none; min-width:68px; padding-right:12px; margin-right:12px; border-right:1px solid var(--line)}
+.city:last-child{border:none}
+.city .n{font-size:11.5px; font-weight:600; color:var(--t2); display:flex; align-items:center; gap:5px}
+.city .t{font-family:var(--mono); font-size:21px; margin-top:6px; letter-spacing:-.02em}
+.city .s{font-size:10px; margin-top:4px; color:var(--t3)}
+.city.z .t,.city.z .n{color:var(--t3)}
+.post{display:block; width:100%; padding:15px 0; border-bottom:1px solid var(--line)}
+.post:last-of-type{border:none}
+.post .tp{display:flex; align-items:center; gap:6px}
+.post .w{margin-left:auto; font-size:10.5px; color:var(--t3)}
+.post .t{font-size:15px; font-weight:700; line-height:1.5; margin-top:9px; letter-spacing:-.02em}
+.post .m{font-size:11.5px; color:var(--t3); margin-top:7px}
+.post .m b{color:var(--ok); font-weight:600}
+.faces{display:flex; margin-top:10px}
+.faces span{width:23px;height:23px;border-radius:50%;border:2px solid #fff; margin-right:-7px;
+  display:flex;align-items:center;justify-content:center;font-size:8.5px;color:#fff;font-weight:700}
+
+/* 작성 */
+/* 상단 제목은 스크롤해도 고정된다 */
+.bar{display:flex; align-items:center; gap:10px; padding:8px 20px 10px;
+  position:sticky; top:0; z-index:30; background:#fff; border-bottom:1px solid var(--line)}
+.bar .bk{width:30px;height:30px;border-radius:9px;background:var(--bg2);display:flex;
+  align-items:center;justify-content:center;font-size:16px;color:var(--t2);flex:none}
+.bar .tt{font-size:16px; font-weight:700; letter-spacing:-.02em}
+.bar .sb2{font-size:11px; color:var(--t3); margin-top:1px}
+.ta{width:100%; background:var(--bg2); border-radius:13px; padding:15px; font-size:14.5px;
+  line-height:1.65; color:var(--t1)}
+.card{background:#fff; border:1px solid var(--line2); border-radius:14px; padding:16px; margin-top:12px}
+.card .ch{display:flex; align-items:center; gap:8px; margin-bottom:12px}
+.card .ch b{font-size:14px; font-weight:700; letter-spacing:-.02em}
+.tags{display:flex; flex-wrap:wrap; gap:7px}
+.tag{padding:7px 10px; border-radius:8px; background:var(--bg2); font-size:12px; font-weight:600}
+.tag small{display:block; font-size:9.5px; color:var(--t3); font-weight:500; margin-bottom:2px}
+.tag.gs{background:#fff; border:1px dashed var(--warn); color:var(--warn)}
+.tag.gs small{color:var(--warn); opacity:.85}
+.rl{display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--line)}
+.rl:last-of-type{border:none}
+.rl .ri{width:30px;height:30px;border-radius:9px;background:var(--bg2);display:flex;
+  align-items:center;justify-content:center;flex:none}
+/* 이모지는 기기마다 컬러/무채색이 섞여 톤이 깨진다 — 단색 SVG로 통일 */
+.rl .ri svg{width:16px;height:16px;stroke:var(--t2);fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.rl .rc{flex:1; min-width:0}
+.rl .rt{display:block; font-size:13.5px; font-weight:700}
+.rl .rd{display:block; font-size:11px; color:var(--t3); margin-top:2px}
+.rl .rx{margin-left:auto; font-size:15px; color:var(--t3)}
+.add{display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:12px 0;
+  border:1px dashed var(--line2); border-radius:10px; margin-top:10px; font-size:13px;
+  font-weight:700; color:var(--brand)}
+.note{display:flex; gap:9px; padding:12px 13px; border-radius:11px; background:var(--warn-bg);
+  font-size:11.5px; line-height:1.65; color:#5C370A; margin-top:12px}
+
+/* 후보 */
+.fold{margin-top:12px; border:1px solid var(--line); border-radius:11px; overflow:hidden}
+.fold summary{list-style:none; padding:12px 14px; font-size:12.5px; font-weight:600; color:var(--t2);
+  cursor:pointer; display:flex; align-items:center; background:var(--bg2)}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"▾"; margin-left:auto; color:var(--t2); font-size:14px}
+.fold[open] summary::after{content:"▴"}
+.fold .fb{padding:12px 14px 14px}
+.fold .fr{display:flex; align-items:center; gap:10px; padding:4px 0}
+.fold .fr .k{flex:1; font-size:12.5px; color:var(--t2)}
+.fold .fr .g{width:70px; height:5px; border-radius:3px; background:var(--line2); overflow:hidden; flex:none}
+.fold .fr .g i{display:block; height:100%; background:var(--t3); border-radius:3px}
+.fold .fr .p{font-family:var(--mono); font-size:11.5px; color:var(--t1); width:30px; text-align:right; flex:none}
+.fold .fn{margin-top:11px; padding-top:10px; border-top:1px solid var(--line2);
+  font-size:11.5px; line-height:1.75; color:var(--t2)}
+.fold .fn b{color:var(--ok)}
+.who{background:#fff; border:1px solid var(--line2); border-radius:15px; padding:16px; margin-top:12px}
+.who.top{border-color:var(--brand-l); border-width:1.5px}
+.who .wt{display:flex; align-items:center; gap:12px}
+.who .wn{font-size:15.5px; font-weight:700; display:flex; align-items:center; gap:6px; letter-spacing:-.02em}
+.who .wr{font-size:11.5px; color:var(--t3); margin-top:3px}
+.who .wv{margin-left:auto; text-align:right}
+.who .wv b{font-family:var(--mono); font-size:19px; color:var(--temp); font-weight:500}
+.who .wv small{display:block; font-size:10px; color:var(--t3); margin-top:2px}
+.who .wm{display:flex; gap:6px; margin-top:12px; flex-wrap:wrap}
+.who .wy{margin-top:12px; padding:12px; border-radius:10px; background:var(--info-bg);
+  font-size:12px; color:#173D77}
+.who .wy b{display:block; color:var(--info); font-size:11.5px; margin-bottom:8px}
+.who .wy ul{list-style:none}
+.who .wy li{position:relative; padding-left:11px; line-height:1.6}
+.who .wy li+li{margin-top:6px}
+.who .wy li::before{content:""; position:absolute; left:1px; top:7px; width:3px; height:3px;
+  border-radius:50%; background:var(--info); opacity:.6}
+
+/* 채팅 */
+.chat{padding:6px 16px 0}
+.sys{text-align:center; font-size:11px; color:var(--t3); background:var(--bg2);
+  border-radius:20px; padding:7px 14px; margin:0 auto 14px; max-width:88%}
+.msg{margin-bottom:13px; max-width:86%}
+.msg.you{margin-right:auto} .msg.me{margin-left:auto}
+.msg .mw{font-size:10.5px; color:var(--t3); margin:0 4px 5px; display:flex; gap:6px; align-items:center}
+.bub{padding:12px 14px; font-size:14px; line-height:1.6; border-radius:15px}
+/* 내 말풍선을 검정으로 두면 너무 무겁다 — 브랜드 톤의 연한 파랑으로 구분한다.
+   상대는 흰 배경 + 테두리. 배경끼리 대비 1.35로 눈에 띄고, 글자 대비는 11.7 확보. */
+.you .bub{background:#fff; border:1px solid #E5E8EC; border-top-left-radius:5px}
+.me .bub{background:#D2DFF2; color:var(--t1); border-top-right-radius:5px}
+.bub .og{font-size:12px; margin-top:9px; padding-top:8px; border-top:1px solid var(--line2); color:var(--t3)}
+.me .bub .og{border-top-color:rgba(23,34,58,.16); color:#4E5968}
+/* 문화 도우미 — 내부 코드명 대신 사용자 문장 */
+/* 대화의 주인공은 메시지다 — 도우미는 배경을 연하게, 여백을 좁게 눌러둔다 */
+.help{margin:5px 4px 0; background:#FEF8EE; border-left:2px solid var(--warn);
+  border-radius:0 10px 10px 0; padding:8px 11px}
+.help .hh{display:flex; align-items:center; gap:5px}
+.help .hh b{font-size:11px; font-weight:700; color:var(--warn)}
+.help .lv{margin-left:auto; display:flex; align-items:center; gap:3px}
+.help .lv i{width:4px;height:4px;border-radius:50%;background:rgba(160,95,14,.28);display:block}
+.help .lv i.f{background:var(--warn)}
+.help .lv span{font-size:9.5px; color:var(--warn); margin-left:2px; font-weight:600}
+.help .ht{font-size:11.5px; line-height:1.6; margin-top:5px; color:#5C370A}
+.help .ht b{color:var(--warn)}
+.help .hy{display:inline-block; margin-top:6px; font-size:10.5px; color:var(--warn);
+  font-weight:600; text-decoration:underline; text-underline-offset:2px}
+/* 보내기 전 확인 */
+.check{background:#fff; border:1.5px solid var(--dgr); border-radius:15px; padding:15px;
+  margin:0 16px 12px; box-shadow:0 8px 24px rgba(25,31,40,.1)}
+.check.soft{border-color:var(--warn)}
+.check .kh{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--dgr)}
+.check.soft .kh{color:var(--warn)}
+.check .kt{font-size:13px; line-height:1.7; margin-top:10px; color:var(--t1)}
+.check .kt b{color:var(--dgr)}
+.check.soft .kt b{color:var(--warn)}
+.check .kf{margin-top:11px; padding:11px 12px; border-radius:10px; background:var(--ok-bg);
+  font-size:12.5px; line-height:1.6; color:#0E4A42}
+.check .kf small{display:block; font-size:10.5px; color:var(--ok); font-weight:700; margin-bottom:4px}
+.check .kn{font-size:10.5px; color:var(--t3); text-align:center; margin-top:10px}
+/* 입력창은 스크롤 영역 밖(.scr 직계)에 둔다. 안에 두면 콘텐츠 끝에 매달려 화면을 가린다 */
+.cin{position:absolute; bottom:68px; left:0; right:0; padding:10px 16px 12px; z-index:35;
+  background:#fff; border-top:1px solid var(--line); display:none; gap:8px; align-items:center}
+.cin.on{display:flex}
+.cin .f{flex:1; background:var(--bg2); border-radius:20px; padding:11px 15px; font-size:13.5px; color:var(--t3)}
+.cin .sd{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
+
+/* 완료 */
+.file{display:flex; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid var(--line); font-size:13px}
+.file:last-child{border:none}
+.file .ok{color:var(--ok); font-size:14px}
+.file .hs{margin-left:auto; font-family:var(--mono); font-size:9.5px; color:var(--t3)}
+.dep{background:var(--ok-bg); border-radius:14px; padding:16px; margin-top:14px}
+/* 한글이 섞이므로 고정폭 글꼴을 쓰지 않는다 (자간이 깨진다) */
+.dep .dv{font-size:24px; font-weight:700; color:var(--ok); letter-spacing:-.02em}
+.dep .dl{font-size:13px; font-weight:700; color:#0E4A42; margin-top:3px}
+.dep ul{margin-top:11px; list-style:none}
+.dep li{font-size:12px; line-height:1.75; color:#12564D; padding-left:14px; position:relative}
+.dep li::before{content:"·"; position:absolute; left:4px}
+.seal{width:100px;height:100px;margin:24px auto 14px; border-radius:50%; border:2px solid var(--temp);
+  display:flex;flex-direction:column;align-items:center;justify-content:center; transform:rotate(-7deg)}
+.seal b{font-family:var(--mono); font-size:19px; color:var(--temp); letter-spacing:-.02em}
+.seal span{font-size:9.5px; color:var(--temp); margin-top:3px; font-weight:700}
+@media (max-width:700px){ .stage{grid-template-columns:1fr; justify-items:center} .idx{position:static; width:100%; max-width:400px} }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="idx">
+    <div class="t">화면</div>
+    <button class="on" data-go="home"><span class="n">01</span>홈</button>
+    <button data-go="write"><span class="n">02</span>시그널 올리기</button>
+    <button data-go="who"><span class="n">03</span>추천 받은 사람</button>
+    <button data-go="chat"><span class="n">04</span>대화</button>
+    <button data-go="done"><span class="n">05</span>마무리</button>
+    <button data-go="find"><span class="n">06</span>직접 찾기</button>
+  </div>
+
+  <div class="phone"><div class="scr">
+    <div class="sb"><span>16:02</span><span>KR 5G</span></div>
+    <div class="vw">
+
+      <!-- ===== 01 홈 ===== -->
+      <section class="pg on" id="p-home">
+        <div class="px">
+          <div class="cap" style="margin-top:12px">서울</div>
+          <div class="h1" style="margin-top:6px">오늘은 누구를 찾고 있나요?</div>
+
+          <button class="temp" data-go="done" style="width:100%">
+            <span class="v">37.3°</span>
+            <span class="m">
+              <span class="l">내 신뢰 온도</span>
+              <span class="tbar"><span class="tfill"></span></span>
+            </span>
+            <span class="go">기록 ›</span>
+          </button>
+
+          <button class="ask" data-go="write">
+            <div class="q">무슨 일에,<br>어떤 사람이 필요한가요?</div>
+            <div class="s">한 줄로 쓰면 알아서 정리해 드려요.</div>
+            <div class="c"><span class="sp">✦</span><b>한 줄이면 충분해요</b></div>
+          </button>
+
+          <button class="find" data-go="find">
+            <span>⌕</span><span>직접 찾아보기</span>
+          </button>
+
+          <div class="kinds">
+            <button class="on">도움</button><button>일</button><button>모임</button><button>섭외</button>
+          </div>
+
+          <div class="sec">지금 깨어 있는 곳</div>
+          <div class="strip">
+            <div class="city"><div class="n"><span class="dot"></span>서울</div><div class="t">16:02</div><div class="s">214명 접속</div></div>
+            <div class="city"><div class="n"><span class="dot"></span>베를린</div><div class="t">09:02</div><div class="s">출근했어요</div></div>
+            <div class="city"><div class="n"><span class="dot"></span>도쿄</div><div class="t">16:02</div><div class="s">178명 접속</div></div>
+            <div class="city z"><div class="n"><span class="dot off"></span>리스본</div><div class="t">08:02</div><div class="s">응답 느려요</div></div>
+            <div class="city z"><div class="n"><span class="dot slp"></span>뉴욕</div><div class="t">03:02</div><div class="s">자는 중</div></div>
+          </div>
+
+          <div class="gap"></div>
+          <div class="sec">주변 시그널 <small>12</small></div>
+
+          <button class="post" data-go="chat">
+            <div class="tp"><span class="chip dgr">도움 · 급해요</span><span class="w">방금</span></div>
+            <div class="t">새벽 3시, 카불 —<br>"아이 열이 39도예요. 병원이 어디죠?"</div>
+            <div class="m">1:1 · 보수 없음 · <b>52초 만에 수락됐어요</b></div>
+          </button>
+
+          <button class="post" data-go="who">
+            <div class="tp"><span class="chip info">모임</span><span class="chip gray">온라인</span><span class="w">오늘 밤 9시</span></div>
+            <div class="t">도쿄·서울 — 레트로 게임 음악 감상회</div>
+            <div class="m">12명 참여 · 일본어와 한국어로 대화해요</div>
+            <div class="faces">
+              <span class="av2">MS</span><span class="av1">LW</span>
+              <span class="av5">AC</span><span class="av6">+9</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== 02 작성 ===== -->
+      <section class="pg" id="p-write">
+        <div class="bar">
+          <button class="bk" data-go="home">‹</button>
+          <div><div class="tt">시그널 올리기</div><div class="sb2">한 줄로 쓰면 정리해 드려요</div></div>
+        </div>
+        <div class="px">
+          <div class="ta">에반게리온 팬게임 같이 만들 사람 찾아요. 6주 정도 보고 있고, 유니티 다루는 분과 캐릭터 아트 해주실 분이 필요해요.</div>
+
+          <div class="card">
+            <div class="ch"><b>이렇게 이해했어요</b><span class="chip info">AI</span></div>
+            <div class="tags">
+              <span class="tag"><small>필요한 기술</small>Unity</span>
+              <span class="tag"><small>필요한 기술</small>캐릭터 아트</span>
+              <span class="tag"><small>진행 방식</small>여러 명과 함께</span>
+              <span class="tag gs"><small>기간 · 추정</small>6주</span>
+              <span class="tag gs"><small>보수 · 추정</small>협의</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--warn);margin-top:11px;line-height:1.6">
+              점선 표시는 <b>직접 쓰지 않으셔서 짐작한 내용</b>이에요. 눌러서 고칠 수 있어요.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="ch"><b>필요한 역할</b><span class="chip ok">직접 정하기</span></div>
+            <div class="rl"><span class="ri"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.2 8.8-2 5.4-5.4 2 2-5.4z"/></svg></span>
+              <span class="rc"><span class="rt">기획 · 디렉팅</span><span class="rd">내가 맡아요</span></span><span class="rx">✕</span></div>
+            <div class="rl"><span class="ri"><svg viewBox="0 0 24 24"><path d="m9 8-4 4 4 4"/><path d="m15 8 4 4-4 4"/></svg></span>
+              <span class="rc"><span class="rt">클라이언트 개발</span><span class="rd">Unity · 구하는 중</span></span><span class="rx">✕</span></div>
+            <div class="rl"><span class="ri"><svg viewBox="0 0 24 24"><path d="M15.5 4.5 19.5 8.5 9.5 18.5l-5 1.5 1.5-5z"/><path d="m13.5 6.5 4 4"/></svg></span>
+              <span class="rc"><span class="rt">캐릭터 아트</span><span class="rd">시트 작업 · 구하는 중</span></span><span class="rx">✕</span></div>
+            <button class="add">＋ 역할 추가</button>
+          </div>
+
+          <div class="note">
+            <span>⚠</span>
+            <span><b>2차 창작 안내</b> — 원작 IP를 쓰는 팬게임은 비상업 조건인지 확인이 필요해요. 약속 보증금 합의서에 관련 항목이 들어갑니다.</span>
+          </div>
+
+          <button class="btn" style="margin-top:14px" data-go="who">시그널 올리고 사람 찾기</button>
+        </div>
+      </section>
+
+      <!-- ===== 03 후보 ===== -->
+      <section class="pg" id="p-who">
+        <div class="bar">
+          <button class="bk" data-go="write">‹</button>
+          <div><div class="tt">이런 분들이 있어요</div><div class="sb2">3명을 찾았어요</div></div>
+        </div>
+        <div class="px">
+          <details class="fold">
+            <summary>순서는 어떻게 정해지나요?</summary>
+            <div class="fb">
+              <div class="fr"><span class="k">기술이 맞는 정도</span><span class="g"><i style="width:100%"></i></span><span class="p">34%</span></div>
+              <div class="fr"><span class="k">신뢰 온도</span><span class="g"><i style="width:65%"></i></span><span class="p">22%</span></div>
+              <div class="fr"><span class="k">시간대가 겹치는 정도</span><span class="g"><i style="width:59%"></i></span><span class="p">20%</span></div>
+              <div class="fr"><span class="k">쓰는 언어</span><span class="g"><i style="width:41%"></i></span><span class="p">14%</span></div>
+              <div class="fr"><span class="k">인증 여부</span><span class="g"><i style="width:29%"></i></span><span class="p">10%</span></div>
+              <div class="fn">문화나 국적은 <b>이 계산에 들어가지 않아요.</b></div>
+            </div>
+          </details>
+
+          <div class="who top">
+            <div class="wt">
+              <span class="av av1">LW</span>
+              <span><span class="wn">L. Weber <span class="cc">DE</span></span><span class="wr">베를린 · 지금 오전 9시 · Unity 8년</span></span>
+              <span class="wv"><b>41.2°</b><small>1순위</small></span>
+            </div>
+            <div class="wm">
+              <span class="chip ok">✓ 깃허브 확인됨</span><span class="chip ok">✓ 본인 확인됨</span>
+              <span class="chip gray">겹치는 시간 2시간</span>
+            </div>
+            <div class="wy">
+              <b>왜 추천했나요</b>
+              <ul>
+                <li>팬게임 2건을 끝까지 마쳤어요 — 결과물로 확인됨</li>
+                <li>셰이더 작업물이 찾으시는 기술과 거의 겹쳐요</li>
+              </ul>
+            </div>
+            <div class="pair" style="margin-top:13px">
+              <button class="btn ghost sm">프로필 보기</button>
+              <button class="btn sm" data-go="chat">함께하자고 하기</button>
+            </div>
+          </div>
+
+          <div class="who">
+            <div class="wt">
+              <span class="av av2">MS</span>
+              <span><span class="wn">M. Sato <span class="cc">JP</span></span><span class="wr">도쿄 · 지금 오후 4시 · 원화 6년</span></span>
+              <span class="wv"><b>39.8°</b><small>2순위</small></span>
+            </div>
+            <div class="wm"><span class="chip ok">✓ 작업물 소유 확인됨</span><span class="chip gray">겹치는 시간 7시간</span></div>
+            <div class="pair" style="margin-top:13px">
+              <button class="btn ghost sm">프로필 보기</button>
+              <button class="btn sm" data-go="chat">함께하자고 하기</button>
+            </div>
+          </div>
+
+          <div class="who">
+            <div class="wt">
+              <span class="av av5">AC</span>
+              <span><span class="wn">A. Costa <span class="cc">PT</span></span><span class="wr">리스본 · 사운드 작업</span></span>
+              <span class="wv"><b>38.1°</b><small>3순위</small></span>
+            </div>
+            <div class="wm"><span class="chip line">찾으시는 역할과 조금 달라요</span></div>
+            <div style="font-size:11.5px;color:var(--t3);margin-top:10px;line-height:1.65">
+              맞지 않는 분도 <b style="color:var(--ok)">숨기지 않고 순서 그대로</b> 보여드려요.
+            </div>
+            <div class="pair" style="margin-top:13px">
+              <button class="btn ghost sm">프로필 보기</button>
+              <button class="btn ghost sm">나중에 보기</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 04 대화 ===== -->
+      <section class="pg" id="p-chat">
+        <div class="bar">
+          <button class="bk" data-go="who">‹</button>
+          <div><div class="tt">EVA 팬게임 크루</div><div class="sb2">3명 · 서울, 베를린, 도쿄</div></div>
+          <span class="chip warn" style="margin-left:auto">번역 켜짐</span>
+        </div>
+
+        <div class="chat">
+          <div class="sys">서로 다른 나라의 3명이 한 팀이 되었어요</div>
+          <div class="sys" style="background:var(--info-bg);color:#173D77">
+            <b>각자 편한 말로 쓰세요.</b> 받는 사람 언어로 바뀌어 전달돼요.
+          </div>
+
+          <div class="msg you">
+            <div class="mw"><span>L. Weber</span><span>독일어</span></div>
+            <div class="bub">
+              이 상태 관리 구조는 확장이 안 됩니다. 다시 만드는 게 맞습니다.
+              <div class="og">원문 — Dieses State-Layer-Design skaliert nicht.</div>
+            </div>
+          </div>
+          <div class="help">
+            <div class="hh"><span>💡</span><b>이렇게 읽으시면 좋아요</b>
+              <span class="lv"><i class="f"></i><i class="f"></i><i class="f"></i><span>자주 그래요</span></span></div>
+            <div class="ht">독일어권에서는 <b>일 이야기를 직설적으로 하는 편</b>이에요. 비난이 아닐 가능성이 높아요.</div>
+            <span class="hy">왜 이렇게 알려주나요?</span>
+          </div>
+
+          <div class="msg me">
+            <div class="mw" style="justify-content:flex-end"><span>나</span></div>
+            <div class="bub">
+              상태 관리는 금요일까지 검토해서 알려드릴게요.
+              <div class="og">L. Weber는 이렇게 받았어요 —<br>Ich schaue mir das State-Management an und melde mich bis Freitag.</div>
+            </div>
+          </div>
+
+          <div class="msg you">
+            <div class="mw"><span>M. Sato</span><span>일본어</span></div>
+            <div class="bub">
+              검토해 보겠습니다.
+              <div class="og">원문 — 検討させていただきます。</div>
+            </div>
+          </div>
+          <div class="help">
+            <div class="hh"><span>💡</span><b>이런 뜻일 수 있어요</b>
+              <span class="lv"><i class="f"></i><i class="f"></i><i></i><span>그런 편이에요</span></span></div>
+            <div class="ht"><b>정중한 보류가 사실상 거절인 경우</b>가 있어요. 다른 방법을 제안해 보세요.</div>
+            <span class="hy">왜 이렇게 알려주나요?</span>
+          </div>
+
+          <div class="msg me">
+            <div class="mw" style="justify-content:flex-end"><span>나</span><span class="chip warn">번역 확인 필요</span></div>
+            <div class="bub">
+              그 부분 ㄱㄱ 하시면 될 듯요
+              <div class="og">줄임말이 많아 번역이 어려웠어요 · 원문 그대로 전달됨</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="check">
+          <div class="kh"><span>✋</span><span>보내기 전에 한 번만 확인해 주세요</span></div>
+          <div class="kt">「<b>Sato씨</b>」라는 호칭은 일본에서 <b>윗사람에게 쓰면 실례가 될 수 있어요.</b></div>
+          <div class="kf"><small>이렇게 바꿔보세요</small>「佐藤さん」 또는 「佐藤 작가님」</div>
+          <div class="pair" style="margin-top:12px">
+            <button class="btn ghost sm">그대로 보내기</button>
+            <button class="btn sm">바꿔서 보내기</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 05 완료 ===== -->
+      <section class="pg" id="p-done">
+        <div class="bar">
+          <button class="bk" data-go="chat">‹</button>
+          <div><div class="tt">6주 뒤 · 마무리</div><div class="sb2">결과물 확인과 보증금 환급</div></div>
+        </div>
+        <div class="px">
+          <div class="sec" style="margin-top:6px">함께 만든 것 <small>4개</small></div>
+          <div class="file"><span class="ok">✓</span><span>기획서 v1.3.pdf</span><span class="hs">9f2a…c41d</span></div>
+          <div class="file"><span class="ok">✓</span><span>플레이 가능한 빌드.apk</span><span class="hs">77b0…e9a2</span></div>
+          <div class="file"><span class="ok">✓</span><span>캐릭터 시트 12종.zip</span><span class="hs">c1d8…04b7</span></div>
+          <div class="file"><span class="ok">✓</span><span>소개 영상.mp4</span><span class="hs">5e6f…b210</span></div>
+          <div class="cap" style="margin-top:10px">파일마다 고유 지문이 남아, 나중에 "내가 만든 것"을 증명할 수 있어요.</div>
+
+          <div class="dep">
+            <div class="dv">300,000원</div>
+            <div class="dl">약속 보증금 전액 돌려드려요</div>
+            <ul>
+              <li>약속을 어긴 사람이 없어서 3명 모두 100,000원씩 돌려받아요</li>
+              <li>서로 합의해서 정한 금액이고, 약속을 어겼을 때만 상대에게 갑니다</li>
+              <li><b>작업비는 두 분이 직접 주고받으세요 — 앱은 관여하지 않아요</b></li>
+            </ul>
+          </div>
+
+          <div class="sec">신뢰 온도가 올랐어요</div>
+          <div class="row"><span class="av av5" style="width:34px;height:34px;font-size:11.5px;border-radius:11px">나</span>
+            <span style="font-size:13.5px;font-weight:600">이민석 · 기획</span>
+            <span class="mono" style="margin-left:auto;color:var(--temp)">37.3 → 38.5</span></div>
+          <div class="row"><span class="av av1" style="width:34px;height:34px;font-size:11.5px;border-radius:11px">LW</span>
+            <span style="font-size:13.5px;font-weight:600">L. Weber · 개발</span>
+            <span class="mono" style="margin-left:auto;color:var(--temp)">41.2 → 42.4</span></div>
+
+          <div class="seal"><b>4 / 4</b><span>국경을 넘었어요</span></div>
+          <div style="text-align:center;padding:0 12px">
+            <div class="h2">크루는 해산했어요</div>
+            <p style="font-size:12.5px;color:var(--t3);line-height:1.8;margin-top:9px">
+              남는 것은 각자의 온도와 함께 만든 결과물이에요.<br>그게 다음 팀에서 신뢰가 됩니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 06 직접 찾기 ===== -->
+      <section class="pg" id="p-find">
+        <div class="bar">
+          <button class="bk" data-go="home">‹</button>
+          <div><div class="tt">직접 찾기</div><div class="sb2">기술 · 지역으로 찾아보기</div></div>
+        </div>
+        <div class="px">
+          <div class="find" style="background:#fff;border:1px solid var(--line2);color:var(--t1)">
+            <span>⌕</span><span>유니티 셰이더 잘하는 사람</span>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:11px;flex-wrap:wrap">
+            <span class="chip ok">Unity</span><span class="chip ok">셰이더</span>
+          </div>
+
+          <div class="sec">찾은 사람 <small>28명</small></div>
+          <div class="row"><span class="av av1">LW</span>
+            <span style="flex:1"><span style="font-size:14px;font-weight:700">L. Weber <span class="cc">DE</span></span>
+            <span style="display:block;font-size:11.5px;color:var(--t3);margin-top:2px">Unity 8년 · 셰이더 · 베를린</span></span>
+            <span class="mono" style="color:var(--temp)">41.2°</span></div>
+          <div class="row"><span class="av av3">JK</span>
+            <span style="flex:1"><span style="font-size:14px;font-weight:700">J. Kim <span class="cc">KR</span></span>
+            <span style="display:block;font-size:11.5px;color:var(--t3);margin-top:2px">Unity 5년 · VFX · 서울</span></span>
+            <span class="mono" style="color:var(--temp)">39.1°</span></div>
+          <div class="row"><span class="av av4">RN</span>
+            <span style="flex:1"><span style="font-size:14px;font-weight:700">R. Nowak <span class="cc">PL</span></span>
+            <span style="display:block;font-size:11.5px;color:var(--t3);margin-top:2px">Unity 3년 · 툴 개발 · 크라쿠프</span></span>
+            <span class="mono" style="color:var(--temp)">36.9°</span></div>
+          <div class="row"><span class="av av2">TA</span>
+            <span style="flex:1"><span style="font-size:14px;font-weight:700">T. Alvarez <span class="cc">MX</span></span>
+            <span style="display:block;font-size:11.5px;color:var(--t3);margin-top:2px">Unity 6년 · 셰이더 · 멕시코시티</span></span>
+            <span class="mono" style="color:var(--temp)">36.4°</span></div>
+          <div class="row"><span class="av av5">HN</span>
+            <span style="flex:1"><span style="font-size:14px;font-weight:700">H. Nguyen <span class="cc">VN</span></span>
+            <span style="display:block;font-size:11.5px;color:var(--t3);margin-top:2px">Unity 4년 · 최적화 · 하노이</span></span>
+            <span class="mono" style="color:var(--temp)">35.8°</span></div>
+          <button class="btn ghost sm" style="margin-top:16px">23명 더 보기</button>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="cin" id="cin"><span class="f">메시지를 입력하세요</span><span class="sd">↑</span></div>
+
+    <div class="tabs">
+      <button class="on" data-tab="home" data-go="home"><span class="i"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/></svg></span>홈</button>
+      <button data-tab="find" data-go="find"><span class="i"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></svg></span>찾기</button>
+      <button data-tab="chat" data-go="chat"><span class="i"><svg viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3.2"/><circle cx="16.5" cy="9.5" r="2.6"/><path d="M3 19c0-3 2.5-4.8 5.5-4.8S14 16 14 19"/><path d="M15.5 14.4c2.7.2 4.5 1.9 4.5 4.6"/></svg></span>크루</button>
+      <button data-tab="done" data-go="done"><span class="i"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg></span>기록</button>
+    </div>
+    <div class="hi"></div>
+  </div></div>
+
+</div>
+
+<script>
+(function(){
+  // 화면 → 어느 탭에 속하는가. 시그널 작성·후보는 홈 흐름, 마무리는 기록 탭이다.
+  var TAB = { home:'home', write:'home', who:'home', chat:'chat', done:'done', find:'find' };
+  function go(id){
+    var tab = TAB[id] || id;
+    document.querySelectorAll('.pg').forEach(function(p){ p.classList.toggle('on', p.id === 'p-' + id); });
+    document.querySelectorAll('.idx button').forEach(function(b){ b.classList.toggle('on', b.dataset.go === id); });
+    document.querySelectorAll('.tabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.tab === tab); });
+    document.getElementById('cin').classList.toggle('on', id === 'chat');   // 입력창은 대화 화면에서만
+    var v = document.querySelector('.vw'); if (v) v.scrollTop = 0;
+  }
+  document.addEventListener('click', function(e){
+    if (e.target.closest('summary')) return;
+    var t = e.target.closest('[data-go]');
+    if (t) { e.preventDefault(); go(t.dataset.go); }
+  });
+})();
+</script>
+</body>
+</html>

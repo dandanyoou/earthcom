@@ -1,0 +1,71 @@
+{
+  "name": "pangaea",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PANGAEA는 인증된 개인과 팀을 등록해 두고, 필요한 사람이 생겼을 때 국경과 상관없이 조건에 맞는 참여자를 찾아 협업으로 연결하는 서비스입니다.",
+  "homepage": "https://github.com/zugzwang24/earth-us-#readme",
+  "bugs": {
+    "url": "https://github.com/zugzwang24/earth-us-/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zugzwang24/earth-us-.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "node --test scripts/tests/*.test.mjs && pnpm -r --if-present test",
+    "check:hooks": "node scripts/verify_git_hooks.mjs",
+    "infra:up": "docker compose up -d postgres redis minio",
+    "infra:down": "docker compose down",
+    "test:infra": "node scripts/test_infra.mjs",
+    "check:i18n": "node scripts/check_i18n_parity.mjs",
+    "check:responsive-boundary": "node scripts/check_page_responsive_boundary.mjs",
+    "backend:lint": "node scripts/backend_exec.mjs ruff check .",
+    "backend:test": "node scripts/backend_exec.mjs python -m pytest -q -m \"not live\"",
+    "backend:ready": "docker compose up -d --wait backend",
+    "verify:pre-push": "pnpm format:check && pnpm lint && pnpm check:i18n && pnpm check:responsive-boundary && pnpm typecheck && pnpm test && pnpm backend:lint && pnpm backend:test"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.33.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
+    "eslint": "^9.33.0",
+    "eslint-config-next": "^15.5.0",
+    "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "typescript-eslint": "^8.39.1"
+  },
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs}": [
+      "prettier --write",
+      "eslint --fix --max-warnings=0 --no-warn-ignored"
+    ],
+    "*.{json,md,css,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*.py": [
+      "node scripts/ruff_staged.mjs"
+    ]
+  }
+}

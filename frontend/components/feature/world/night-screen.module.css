@@ -1,0 +1,41 @@
+/* Cohesion wrapper for the PANGAEA app tabs (찾기·크루·기록). Redefines the
+   design tokens to a dark palette on this subtree so the token-driven screens
+   render dark, over the same cosmic backdrop as the globe home — no jarring
+   white panels. Custom properties set here cascade to all descendants even
+   though the class name itself is CSS-module-scoped. */
+.stage {
+  --bg: #111c31;
+  --bg2: #0c1526;
+  --bg3: #17243b;
+  --line: #223146;
+  --line2: #2c3e59;
+  --t1: #eef3fd;
+  --t2: #b8c6de;
+  --t3: #8a9cb8;
+  --brand: #eef3fd;
+  --brand-l: #c9d6ea;
+  --soft: #17243b;
+
+  position: relative;
+  min-height: 100dvh;
+  padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+  color: var(--t1);
+  color-scheme: dark;
+  background:
+    radial-gradient(120% 90% at 82% 4%, rgb(38 74 150 / 26%) 0%, transparent 60%),
+    radial-gradient(90% 80% at 8% 98%, rgb(120 70 170 / 16%) 0%, transparent 62%), #05070f;
+}
+
+/* keep the app's own inner chrome from painting a hard white edge */
+.stage :global(.desktop-shell),
+.stage :global(.mobile-shell),
+.stage :global(.screen) {
+  background: transparent !important;
+}
+
+.col {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 8px 0 0;
+}

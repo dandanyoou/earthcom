@@ -1,0 +1,279 @@
+.shell {
+  min-height: calc(100dvh - 49px);
+  background: var(--bg);
+}
+
+.viewport {
+  min-width: 0;
+  min-height: inherit;
+}
+
+.main {
+  min-height: inherit;
+  padding-bottom: 68px;
+}
+
+.content {
+  width: 100%;
+  max-width: 960px;
+  min-height: inherit;
+  margin: 0 auto;
+}
+
+.sideNav {
+  display: none;
+  border-right: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.brand {
+  color: var(--brand);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.sideNavLinks {
+  display: grid;
+  gap: 6px;
+}
+
+.sideNavLink {
+  position: relative;
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--t2);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.sideNavLink::before {
+  position: absolute;
+  top: 9px;
+  bottom: 9px;
+  left: -16px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: transparent;
+  content: "";
+}
+
+.sideNavLink[data-active="true"] {
+  background: var(--soft);
+  color: var(--brand);
+}
+
+.sideNavLink[data-active="true"]::before {
+  background: var(--brand);
+}
+
+.sideNavIcon {
+  display: flex;
+  width: 21px;
+  height: 21px;
+  align-items: center;
+  justify-content: center;
+}
+
+.sideNavIcon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.chatShell {
+  display: grid;
+  grid-template-areas:
+    "list"
+    "messages"
+    "assistant"
+    "guard"
+    "composer";
+  gap: 12px;
+  padding: 20px;
+}
+
+.chatList,
+.chatMessages,
+.chatGuard,
+.chatComposer,
+.chatAssistant {
+  min-width: 0;
+  border: 1px solid var(--line2);
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.chatList,
+.chatMessages,
+.chatAssistant {
+  padding: 18px;
+}
+
+.chatList {
+  grid-area: list;
+}
+
+.chatMessages {
+  min-height: 260px;
+  grid-area: messages;
+}
+
+.chatGuard {
+  display: flex;
+  grid-area: guard;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-color: var(--dgr);
+  background: var(--dgr-bg);
+  color: var(--dgr);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.chatComposer {
+  display: flex;
+  grid-area: composer;
+  gap: 8px;
+  padding: 10px;
+}
+
+.chatComposer label {
+  flex: 1;
+}
+
+.chatComposer input {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  outline: none;
+}
+
+.chatComposer button {
+  min-width: 72px;
+  border: 1.5px solid var(--brand);
+  border-radius: 10px;
+  background: var(--brand);
+  color: white;
+  font-weight: 750;
+}
+
+.chatAssistant {
+  grid-area: assistant;
+  background: var(--soft);
+}
+
+.chatList h1,
+.chatMessages h2,
+.chatAssistant h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.chatList p,
+.chatMessages p,
+.chatAssistant p {
+  margin: 9px 0 0;
+  color: var(--t2);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.chatList strong {
+  display: block;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (min-width: 768px) {
+  .content {
+    max-width: 520px;
+  }
+
+  .chatShell {
+    padding: 28px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .content {
+    max-width: 960px;
+  }
+
+  .sideNav {
+    position: sticky;
+    top: 0;
+    display: flex;
+    height: calc(100dvh - 49px);
+    flex-direction: column;
+    gap: 34px;
+    padding: 28px 16px;
+  }
+
+  .main {
+    padding-bottom: 0;
+  }
+
+  .shell :global(.tab-bar) {
+    display: none;
+  }
+
+  .chatShell {
+    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-areas:
+      "list messages"
+      "list assistant"
+      "list guard"
+      "list composer";
+    align-items: start;
+  }
+
+  .chatList {
+    align-self: stretch;
+  }
+}
+
+@media (min-width: 1440px) {
+  .content:has(.chatShell) {
+    max-width: 1180px;
+  }
+
+  .chatShell {
+    grid-template-columns: 280px minmax(0, 1fr) 320px;
+    grid-template-areas:
+      "list messages assistant"
+      "list guard assistant"
+      "list composer assistant";
+  }
+
+  .chatAssistant {
+    align-self: stretch;
+  }
+}

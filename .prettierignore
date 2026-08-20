@@ -1,0 +1,7 @@
+docs/SPEC.md
+docs/reference/
+node_modules/
+.next/
+playwright-report/
+test-results/
+pnpm-lock.yaml

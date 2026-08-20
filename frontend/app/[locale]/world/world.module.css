@@ -1,0 +1,133 @@
+.stage {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 78% 8%, rgb(38 74 150 / 30%) 0%, transparent 60%),
+    radial-gradient(90% 80% at 12% 96%, rgb(120 70 170 / 18%) 0%, transparent 62%), #05070f;
+  color: #eef3fd;
+  transition: background 1.2s ease;
+}
+
+/* the whole globe home shifts dark↔light with the viewer's local time */
+.stage[data-tod="night"] {
+  background:
+    radial-gradient(120% 90% at 78% 8%, rgb(38 74 150 / 30%) 0%, transparent 60%),
+    radial-gradient(90% 80% at 12% 96%, rgb(120 70 170 / 18%) 0%, transparent 62%), #05070f;
+}
+.stage[data-tod="evening"] {
+  background:
+    radial-gradient(120% 95% at 80% 4%, rgb(255 138 60 / 26%) 0%, transparent 58%),
+    radial-gradient(90% 80% at 10% 98%, rgb(120 40 90 / 30%) 0%, transparent 62%), #0a0713;
+}
+.stage[data-tod="morning"] {
+  background:
+    radial-gradient(120% 95% at 78% 6%, rgb(255 210 150 / 34%) 0%, transparent 60%),
+    radial-gradient(95% 85% at 12% 96%, rgb(150 190 255 / 26%) 0%, transparent 64%), #101826;
+  color: #f3f7ff;
+}
+.stage[data-tod="day"] {
+  background:
+    radial-gradient(130% 100% at 76% 2%, rgb(150 200 255 / 46%) 0%, transparent 62%),
+    radial-gradient(100% 90% at 10% 98%, rgb(190 220 255 / 30%) 0%, transparent 66%), #16233a;
+  color: #f3f7ff;
+}
+
+/* a soft wash layer so text/HUD keep contrast as the sky brightens */
+.todWash {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: transparent;
+  transition: background 1.2s ease;
+}
+.stage[data-tod="day"] .todWash,
+.stage[data-tod="morning"] .todWash {
+  background: linear-gradient(180deg, rgb(9 14 27 / 0%) 60%, rgb(9 14 27 / 34%) 100%);
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(2rem, 6vw, 5rem) clamp(1.25rem, 5vw, 4rem)
+    calc(84px + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+
+.hero {
+  max-width: 34rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.6rem;
+  color: #ffc978;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2rem, 5.4vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  text-shadow: 0 2px 30px rgb(4 6 13 / 80%);
+}
+
+.sub {
+  max-width: 26rem;
+  margin: 1rem 0 0;
+  color: #a9bad6;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  text-shadow: 0 1px 16px rgb(4 6 13 / 90%);
+}
+
+.rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  pointer-events: auto;
+}
+
+.chip {
+  display: flex;
+  min-width: 118px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 15px;
+  border: 1px solid rgb(146 176 226 / 22%);
+  border-left: 3px solid var(--accent, #ffc978);
+  border-radius: 13px;
+  background: rgb(11 17 32 / 62%);
+  color: #eef3fd;
+  backdrop-filter: blur(16px);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.chip:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent, #ffc978);
+}
+
+.chipName {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.chipRole {
+  color: #7286a6;
+  font-size: 11px;
+  font-weight: 600;
+}

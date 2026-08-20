@@ -1,0 +1,31 @@
+:root {
+  --bg: #ffffff;
+  --bg2: #f7f8fa;
+  --bg3: #fdf4e7;
+  --line: #edeff3;
+  --line2: #dfe3ea;
+  --t1: #191f28;
+  --t2: #4e5968;
+  --t3: #6b7684;
+  --brand: #17223a;
+  --brand-l: #26364f;
+  --temp: #b4571e;
+  --temp-bar: #e08a2e;
+  --ok: #1c7a6e;
+  --ok-bg: #e7f4f1;
+  --info: #1f4e96;
+  --info-bg: #eaf1fb;
+  --warn: #a05f0e;
+  --warn-bg: #fdf3e2;
+  --dgr: #c0392b;
+  --dgr-bg: #fdecea;
+  --avatar1: #5a6980;
+  --avatar2: #75587a;
+  --avatar3: #5f7360;
+  --avatar4: #54608c;
+  --avatar5: #6e7076;
+  --avatar6: #8e959e;
+  --kr: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: light;
+}

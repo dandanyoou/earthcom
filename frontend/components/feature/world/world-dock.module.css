@@ -1,0 +1,80 @@
+/* Floating glass dock — sits naturally over the globe, not a white slab. */
+.dock {
+  position: fixed;
+  z-index: 40;
+  right: 0;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  display: flex;
+  gap: 4px;
+  width: max-content;
+  max-width: calc(100vw - 28px);
+  margin: 0 auto;
+  padding: 6px;
+  border: 1px solid rgb(160 185 230 / 20%);
+  border-radius: 999px;
+  background: rgb(9 14 27 / 52%);
+  box-shadow:
+    0 10px 40px rgb(4 6 13 / 45%),
+    inset 0 1px 0 rgb(255 255 255 / 6%);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  color: rgb(220 230 246 / 72%);
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+.link:hover {
+  color: #eef3fd;
+  background: rgb(255 255 255 / 6%);
+}
+.link[data-active="true"] {
+  color: #0b1524;
+  background: #eef3fd;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+.icon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+/* labels hide on very narrow screens so the dock stays a tidy pill */
+@media (max-width: 420px) {
+  .label {
+    display: none;
+  }
+  .link {
+    padding: 10px 14px;
+  }
+}
+
+/* light time-of-day: lift the dock so it reads on a bright globe */
+:global(.world[data-tod="day"]) .dock,
+:global(.stage[data-tod="day"]) .dock,
+:global(.world[data-tod="morning"]) .dock,
+:global(.stage[data-tod="morning"]) .dock {
+  border-color: rgb(30 50 90 / 18%);
+  background: rgb(20 30 52 / 42%);
+}
