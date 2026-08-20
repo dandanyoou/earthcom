@@ -35,7 +35,7 @@ function AuthCard({ mode }: { mode: "login" | "signup" }) {
     <div className="auth-screen">
       <form className="auth-card" onSubmit={submit}>
         <div className="auth-brand">
-          PANGAEA<span>.</span>
+          Earth(us)<span>.</span>
         </div>
         <p className="auth-tagline">{t("tagline")}</p>
         <div className="field">

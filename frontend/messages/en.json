@@ -4,7 +4,7 @@
   },
   "navigation": {
     "ariaLabel": "Primary navigation",
-    "brand": "PANGAEA",
+    "brand": "Earth(us)",
     "home": "Home",
     "find": "Find",
     "signals": "My signals",
@@ -26,9 +26,9 @@
     "assistantBody": "Agree on the requested role, schedule, and deliverable criteria to clarify the next step."
   },
   "foundation": {
-    "eyebrow": "PANGAEA / P0",
+    "eyebrow": "Earth(us) / P0",
     "home": {
-      "title": "PANGAEA",
+      "title": "Earth(us)",
       "description": "Cross-border collaboration starts here."
     },
     "find": {
@@ -47,7 +47,7 @@
     "cardStatus": "Ready for the vertical slice"
   },
   "components": {
-    "title": "PANGAEA components",
+    "title": "Earth(us) components",
     "buttons": "Buttons",
     "primary": "Invite to collaborate",
     "ghost": "View profile",
@@ -125,7 +125,7 @@
     "daysAgo": "{count}d ago"
   },
   "auth": {
-    "brand": "PANGAEA",
+    "brand": "Earth(us)",
     "tagline": "Register verified people ahead of time, then get matched across borders.",
     "email": "Email",
     "password": "Password",

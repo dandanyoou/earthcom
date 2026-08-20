@@ -1,1 +1,1 @@
-"""PANGAEA domain modules."""
+"""Earth(us) domain modules."""

@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "PANGAEA",
-    short_name: "PANGAEA",
+    name: "Earth(us)",
+    short_name: "Earth(us)",
     description: "국경을 넘어 함께 만드는 협업 플랫폼",
     start_url: "/ko/home",
     display: "standalone",

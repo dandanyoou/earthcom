@@ -2,7 +2,7 @@
   "name": "pangaea",
   "version": "1.0.0",
   "private": true,
-  "description": "PANGAEA는 인증된 개인과 팀을 등록해 두고, 필요한 사람이 생겼을 때 국경과 상관없이 조건에 맞는 참여자를 찾아 협업으로 연결하는 서비스입니다.",
+  "description": "Earth(us)는 인증된 개인과 팀을 등록해 두고, 필요한 사람이 생겼을 때 국경과 상관없이 조건에 맞는 참여자를 찾아 협업으로 연결하는 서비스입니다.",
   "homepage": "https://github.com/zugzwang24/earth-us-#readme",
   "bugs": {
     "url": "https://github.com/zugzwang24/earth-us-/issues"

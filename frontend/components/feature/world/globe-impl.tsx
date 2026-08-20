@@ -1,6 +1,6 @@
 "use client";
 
-// The PANGAEA globe: a night-earth sphere with the five cities as glowing,
+// The Earth(us) globe: a night-earth sphere with the five cities as glowing,
 // clickable markers. Clicking a city routes into its scroll-world. Browser-only
 // (WebGL + window), so it is always loaded via dynamic(ssr:false).
 

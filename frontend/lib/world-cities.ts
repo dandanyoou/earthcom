@@ -1,4 +1,4 @@
-// The five PANGAEA cities shown on the globe home, each with its own
+// The five Earth(us) cities shown on the globe home, each with its own
 // three-scene scroll-world. Copy is kept bilingual here (not in the next-intl
 // catalog) because it is passed as config into the vanilla scroll engine, not
 // rendered as JSX. Select by locale in the component.
@@ -237,7 +237,7 @@ export const CITIES: City[] = [
         {
           eyebrow: "Times Square · Crossroads",
           title: "The center where the world meets",
-          body: "At the neon crossroads, five cities become one Pangaea.",
+          body: "At the neon crossroads, five cities meet in Earth(us).",
         },
       ],
     },

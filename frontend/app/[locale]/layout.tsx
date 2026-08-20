@@ -24,13 +24,13 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
 
   return {
     description: t("description"),
-    title: "PANGAEA",
+    title: "Earth(us)",
     manifest: "/manifest.webmanifest",
     icons: {
       icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
       apple: [{ url: "/icons/icon-192.png" }],
     },
-    appleWebApp: { capable: true, statusBarStyle: "default", title: "PANGAEA" },
+    appleWebApp: { capable: true, statusBarStyle: "default", title: "Earth(us)" },
   };
 }
 

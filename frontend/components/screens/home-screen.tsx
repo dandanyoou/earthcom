@@ -90,7 +90,7 @@ export function HomeScreen() {
   return (
     <div className="px" style={{ paddingBottom: 24 }}>
       <div className="cap" style={{ marginTop: 12 }}>
-        {data.profile?.city_code ? t(`cities.${data.profile.city_code}`) : "PANGAEA"}
+        {data.profile?.city_code ? t(`cities.${data.profile.city_code}`) : "Earth(us)"}
       </div>
       <h1 className="h1" style={{ marginTop: 6 }}>
         {t("home.title")}

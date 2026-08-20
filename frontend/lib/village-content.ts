@@ -1,4 +1,4 @@
-// Demo posts for each city. Every country supports the same five PANGAEA
+// Demo posts for each city. Every country supports the same five Earth(us)
 // categories, and each holds the posts its users created. Rendered with the
 // same .post / .chip design as /ko/home. Deterministic (no randomness) so SSR
 // and client hydrate identically. Swap for the real API later.

@@ -1,5 +1,5 @@
 /**
- * Thin typed client for the PANGAEA backend (localhost demo).
+ * Thin typed client for the Earth(us) backend (localhost demo).
  * Access token lives in localStorage; a 401 triggers one cookie-based refresh.
  */
 

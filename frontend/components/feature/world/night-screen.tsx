@@ -1,4 +1,4 @@
-// Wraps the PANGAEA app tabs (찾기·크루·기록) so they share the dark, cosmic
+// Wraps the Earth(us) app tabs (찾기·크루·기록) so they share the dark, cosmic
 // look of the globe home instead of appearing as disconnected white screens.
 // The token overrides live in the CSS module; here we just compose the dark
 // stage, the screen content, and the floating glass dock.

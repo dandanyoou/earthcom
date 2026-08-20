@@ -12,7 +12,7 @@ export function DemoSurface() {
           <iframe
             src={`/${locale}/home`}
             style={{ border: 0, height: "100%", width: "100%" }}
-            title="PANGAEA"
+            title="Earth(us)"
           />
         </div>
       </div>

@@ -19,7 +19,7 @@ export default async function WorldHome({ params }: { params: Promise<{ locale: 
 
       <div className={styles.hud}>
         <header className={styles.hero}>
-          <p className={styles.eyebrow}>PANGAEA</p>
+          <p className={styles.eyebrow}>Earth(us)</p>
           <h1 className={styles.title}>
             {loc === "ko" ? "국경 없는 하나의 세계" : "One world, no borders"}
           </h1>

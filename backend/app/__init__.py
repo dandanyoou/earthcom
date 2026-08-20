@@ -1,1 +1,1 @@
-"""PANGAEA backend application."""
+"""Earth(us) backend application."""
