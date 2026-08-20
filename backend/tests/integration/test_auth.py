@@ -86,7 +86,9 @@ def test_refresh_cookie_is_secure_in_production() -> None:
 
     set_refresh_cookie(response, "opaque-token", settings)
 
-    assert "Secure" in response.headers["set-cookie"]
+    cookie = response.headers["set-cookie"]
+    assert "Secure" in cookie
+    assert "SameSite=none" in cookie
 
 
 async def test_login_limits_the_socket_peer_and_ignores_forwarded_headers(

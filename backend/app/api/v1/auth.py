@@ -70,7 +70,7 @@ def set_refresh_cookie(response: Response, refresh_token: str, settings: Setting
         max_age=settings.refresh_token_ttl_days * 86400,
         httponly=True,
         secure=settings.refresh_cookie_secure,
-        samesite="lax",
+        samesite="none" if settings.refresh_cookie_secure else "lax",
         path=AUTH_COOKIE_PATH,
     )
 
@@ -81,7 +81,7 @@ def delete_refresh_cookie(response: Response, settings: Settings) -> None:
         path=AUTH_COOKIE_PATH,
         secure=settings.refresh_cookie_secure,
         httponly=True,
-        samesite="lax",
+        samesite="none" if settings.refresh_cookie_secure else "lax",
     )
 
 
