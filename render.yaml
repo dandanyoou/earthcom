@@ -5,9 +5,9 @@ services:
     plan: free
     region: singapore
     repo: https://github.com/dandanyoou/earthcom
-    branch: main
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    branch: render-backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health/live
     autoDeployTrigger: commit
     envVars:
