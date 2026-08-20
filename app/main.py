@@ -18,7 +18,7 @@ from app.settings import get_settings
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    application = FastAPI(title="PANGAEA API", version="0.1.0")
+    application = FastAPI(title="Earth(us) API", version="0.1.0")
     # In development the frontend may be opened from a phone on the same LAN
     # (http://<mac-ip>:3000), so private-network origins are allowed alongside
     # the configured list. Production keeps the explicit allowlist only.
