@@ -34,6 +34,12 @@
   color: var(--t1);
 }
 
+.button--danger {
+  border-color: var(--dgr);
+  background: var(--dgr-bg);
+  color: var(--dgr);
+}
+
 .button--small {
   min-height: 41px;
   padding: 10px 14px;

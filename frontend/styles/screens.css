@@ -1107,6 +1107,76 @@
   text-align: center;
   line-height: 1.7;
 }
+
+/* ── My signals ─────────────────────────────────────────────────────────── */
+.signal-manage-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  text-align: center;
+}
+.signal-manage-summary > span {
+  padding: 2px 8px;
+  border-right: 1px solid var(--line);
+}
+.signal-manage-summary > span:last-child {
+  border-right: 0;
+}
+.signal-manage-summary b,
+.signal-manage-summary small {
+  display: block;
+}
+.signal-manage-summary b {
+  font-family: var(--mono);
+  font-size: 21px;
+}
+.signal-manage-summary small {
+  margin-top: 3px;
+  color: var(--t3);
+  font-size: 10.5px;
+}
+.signal-manage-card {
+  max-width: none;
+  margin-top: 12px;
+}
+.signal-manage-title {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--t1);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.55;
+  text-align: left;
+}
+.signal-manage-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 14px;
+}
+.signal-manage-actions > * {
+  min-width: 0;
+  flex: 1;
+}
+.signal-manage-lock-note {
+  margin: 10px 0 0;
+  line-height: 1.55;
+}
+.signal-delete-preview {
+  max-height: 84px;
+  margin: 14px 0 0;
+  padding: 11px 12px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: var(--bg2);
+  color: var(--t2);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
 .inline-chips {
   display: flex;
   flex-wrap: wrap;

@@ -7,6 +7,7 @@
     "brand": "PANGAEA",
     "home": "Home",
     "find": "Find",
+    "signals": "My signals",
     "crew": "Crew",
     "history": "History"
   },
@@ -189,6 +190,11 @@
     "highRiskTitle": "Safety notice",
     "submit": "Post and find people",
     "submitting": "Posting…",
+    "editTitle": "Edit signal",
+    "editSubtitle": "We'll restructure the updated conditions",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "editLocked": "A signal cannot be edited after collaboration starts.",
     "editSheetTitle": "Fix the estimates",
     "editSheetSubtitle": "Values you didn't write are guesses. Leave them if they're right.",
     "editDuration": "Duration (weeks)",
@@ -410,6 +416,35 @@
     "COLLABORATION_COMPLETED": "\"{title}\" crossed the finish line",
     "REVIEW_RECEIVED": "You received a new review"
   },
+  "mySignals": {
+    "title": "My signals",
+    "subtitle": "Manage every signal you posted",
+    "create": "+ New signal",
+    "editableCount": "Editable",
+    "lockedCount": "In progress · closed",
+    "totalCount": "Total",
+    "filter": {
+      "all": "All",
+      "editable": "Managing",
+      "locked": "In progress · closed"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "OPEN": "Recruiting",
+      "PAUSED": "Paused",
+      "IN_PROGRESS": "In progress",
+      "CLOSED": "Closed",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled",
+      "COMPLETED": "Completed"
+    },
+    "empty": "You haven't posted a signal yet.",
+    "filterEmpty": "No signals have this status.",
+    "createFirst": "Post your first signal",
+    "noRoles": "No roles specified",
+    "view": "View details",
+    "lockedNotice": "Signals in progress or completed cannot be edited or deleted, preserving the collaboration record."
+  },
   "signalDetail": {
     "title": "Signal",
     "apply": "Apply",
@@ -423,6 +458,13 @@
     "undecided": "Undecided",
     "recommendations": "See recommendations",
     "mine": "This is your signal",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete this signal?",
+    "deleteDescription": "The signal and its pending applications will be deleted. This cannot be undone.",
+    "deleteConfirm": "Delete",
+    "deleting": "Deleting…",
+    "deleteFailed": "Could not delete the signal. Check whether collaboration has already started.",
     "applySheetTitle": "Apply",
     "applyMessagePlaceholder": "Say which role you'd like to take.",
     "applyDone": "Applied. We'll notify you when they respond."

@@ -25,12 +25,15 @@ export function SignalDetailScreen({ signalId }: { signalId: string }) {
   const [applyRole, setApplyRole] = useState("");
   const [applyMessage, setApplyMessage] = useState("");
   const [applyState, setApplyState] = useState<"idle" | "busy" | "done" | "dup">("idle");
+  const [deleteSheet, setDeleteSheet] = useState(false);
+  const [deleteState, setDeleteState] = useState<"idle" | "busy" | "error">("idle");
   const meQuery = useApiData(() => api.me(), ready);
   const { data, error, loading, reload } = useApiData<Signal>(() => api.signal(signalId), ready);
 
   if (!ready || loading || !data) return <LoadingBlock error={error} reload={reload} />;
 
   const mine = meQuery.data?.profile?.id === data.requester?.id;
+  const canManage = mine && (data.status === "DRAFT" || data.status === "OPEN");
 
   async function submitApply() {
     setApplyState("busy");
@@ -43,6 +46,16 @@ export function SignalDetailScreen({ signalId }: { signalId: string }) {
       setApplyState("done");
     } catch (err) {
       setApplyState((err as { code?: string }).code === "APPLICATION_DUPLICATE" ? "dup" : "idle");
+    }
+  }
+
+  async function deleteSignal() {
+    setDeleteState("busy");
+    try {
+      await api.deleteSignal(signalId);
+      router.replace("/home");
+    } catch {
+      setDeleteState("error");
     }
   }
 
@@ -155,6 +168,20 @@ export function SignalDetailScreen({ signalId }: { signalId: string }) {
             </Button>
           )}
         </div>
+        {canManage ? (
+          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+            <Button
+              onClick={() => router.push(`/signals/${data.id}/edit`)}
+              type="button"
+              variant="ghost"
+            >
+              {t("signalDetail.edit")}
+            </Button>
+            <Button onClick={() => setDeleteSheet(true)} type="button" variant="danger">
+              {t("signalDetail.delete")}
+            </Button>
+          </div>
+        ) : null}
         {mine ? (
           <p className="cap" style={{ marginTop: 8, textAlign: "center" }}>
             {t("signalDetail.mine")}
@@ -217,6 +244,40 @@ export function SignalDetailScreen({ signalId }: { signalId: string }) {
             </div>
           </>
         )}
+      </Sheet>
+
+      <Sheet
+        onClose={() => {
+          if (deleteState !== "busy") {
+            setDeleteSheet(false);
+            setDeleteState("idle");
+          }
+        }}
+        open={deleteSheet}
+        subtitle={t("signalDetail.deleteDescription")}
+        title={t("signalDetail.deleteTitle")}
+      >
+        {deleteState === "error" ? (
+          <div className="form-error">{t("signalDetail.deleteFailed")}</div>
+        ) : null}
+        <div style={{ display: "flex", gap: 8, marginTop: 18 }}>
+          <Button
+            disabled={deleteState === "busy"}
+            onClick={() => setDeleteSheet(false)}
+            type="button"
+            variant="ghost"
+          >
+            {t("common.cancel")}
+          </Button>
+          <Button
+            disabled={deleteState === "busy"}
+            onClick={deleteSignal}
+            type="button"
+            variant="danger"
+          >
+            {deleteState === "busy" ? t("signalDetail.deleting") : t("signalDetail.deleteConfirm")}
+          </Button>
+        </div>
       </Sheet>
     </div>
   );

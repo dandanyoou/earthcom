@@ -8,7 +8,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   setRequestLocale(locale);
 
   return (
-    <AppShell activeTab="home">
+    <AppShell activeTab="signals">
       <WriteScreen />
     </AppShell>
   );

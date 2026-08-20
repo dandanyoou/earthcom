@@ -234,3 +234,79 @@ async def test_signal_moderation_and_pii_gate(auth_environment) -> None:
     )
     assert blocked.status_code == 422
     assert blocked.json()["error"]["code"] == "SIGNAL_PII_PRESENT"
+
+
+async def test_signal_owner_can_update_and_delete(auth_environment) -> None:
+    client = auth_environment.client
+    await seed_database()
+    minseok = await login(client, "minseok@pangaea.dev")
+    costa = await login(client, "costa@pangaea.dev")
+
+    created = await client.post(
+        "/api/v1/signals",
+        headers=minseok,
+        json={
+            "raw_text": "리액트 화면 구현을 도와줄 분을 찾아요.",
+            "roles_form": [{"label": "리액트 개발", "headcount": 1, "form_position": 0}],
+        },
+    )
+    assert created.status_code == 201, created.text
+    signal_id = created.json()["data"]["id"]
+    published = await client.post(
+        f"/api/v1/signals/{signal_id}/publish",
+        headers=minseok,
+        json={"inferred_confirmed": True},
+    )
+    assert published.status_code == 200, published.text
+
+    denied_update = await client.patch(
+        f"/api/v1/signals/{signal_id}",
+        headers=costa,
+        json={
+            "raw_text": "남의 시그널을 바꿔요.",
+            "roles_form": [],
+            "inferred_confirmed": True,
+        },
+    )
+    assert denied_update.status_code == 403
+    assert denied_update.json()["error"]["code"] == "ACTING_PROFILE_FORBIDDEN"
+
+    updated = await client.patch(
+        f"/api/v1/signals/{signal_id}",
+        headers=minseok,
+        json={
+            "raw_text": "유니티 셰이더 화면 구현을 도와줄 분을 찾아요.",
+            "roles_form": [{"label": "셰이더 개발", "headcount": 2, "form_position": 0}],
+            "inferred_confirmed": True,
+        },
+    )
+    assert updated.status_code == 200, updated.text
+    payload = updated.json()["data"]
+    assert payload["status"] == "OPEN"
+    assert payload["raw_text"] == "유니티 셰이더 화면 구현을 도와줄 분을 찾아요."
+    assert [(role["label"], role["headcount"]) for role in payload["roles"]] == [("셰이더 개발", 2)]
+    assert any(skill["name"] == "Unity" for skill in payload["skills"])
+
+    denied_delete = await client.delete(f"/api/v1/signals/{signal_id}", headers=costa)
+    assert denied_delete.status_code == 403
+
+    deleted = await client.delete(f"/api/v1/signals/{signal_id}", headers=minseok)
+    assert deleted.status_code == 204, deleted.text
+    assert not deleted.content
+
+    missing = await client.get(f"/api/v1/signals/{signal_id}", headers=minseok)
+    assert missing.status_code == 404
+    mine = (await client.get("/api/v1/signals?mine=true", headers=minseok)).json()["data"]
+    assert all(signal["id"] != signal_id for signal in mine)
+
+    locked = next(signal for signal in mine if signal["status"] == "IN_PROGRESS")
+    locked_update = await client.patch(
+        f"/api/v1/signals/{locked['id']}",
+        headers=minseok,
+        json={"raw_text": "진행 중인 요청 변경", "roles_form": []},
+    )
+    assert locked_update.status_code == 409
+    assert locked_update.json()["error"]["code"] == "SIGNAL_LOCKED"
+    locked_delete = await client.delete(f"/api/v1/signals/{locked['id']}", headers=minseok)
+    assert locked_delete.status_code == 409
+    assert locked_delete.json()["error"]["code"] == "SIGNAL_LOCKED"

@@ -7,6 +7,7 @@
     "brand": "PANGAEA",
     "home": "홈",
     "find": "찾기",
+    "signals": "내 시그널",
     "crew": "크루",
     "history": "기록"
   },
@@ -189,6 +190,11 @@
     "highRiskTitle": "안전 안내",
     "submit": "시그널 올리고 사람 찾기",
     "submitting": "올리는 중…",
+    "editTitle": "시그널 수정",
+    "editSubtitle": "바꾼 조건으로 다시 정리해 드려요",
+    "save": "수정 내용 저장하기",
+    "saving": "저장하는 중…",
+    "editLocked": "협업이 시작된 시그널은 수정할 수 없어요.",
     "editSheetTitle": "추정값 고치기",
     "editSheetSubtitle": "직접 쓰지 않은 값은 짐작이에요. 맞으면 그대로 두세요.",
     "editDuration": "기간 (주)",
@@ -410,6 +416,35 @@
     "COLLABORATION_COMPLETED": "「{title}」 크루가 완주했어요",
     "REVIEW_RECEIVED": "새 평가가 도착했어요"
   },
+  "mySignals": {
+    "title": "내 시그널",
+    "subtitle": "올린 시그널을 한곳에서 관리해요",
+    "create": "＋ 새 시그널",
+    "editableCount": "수정 가능",
+    "lockedCount": "진행·종료",
+    "totalCount": "전체",
+    "filter": {
+      "all": "전체",
+      "editable": "관리 중",
+      "locked": "진행·종료"
+    },
+    "status": {
+      "DRAFT": "작성 중",
+      "OPEN": "모집 중",
+      "PAUSED": "일시 정지",
+      "IN_PROGRESS": "진행 중",
+      "CLOSED": "마감",
+      "EXPIRED": "기간 만료",
+      "CANCELLED": "취소됨",
+      "COMPLETED": "완료"
+    },
+    "empty": "아직 올린 시그널이 없어요.",
+    "filterEmpty": "이 상태의 시그널이 없어요.",
+    "createFirst": "첫 시그널 올리기",
+    "noRoles": "역할 미지정",
+    "view": "상세 보기",
+    "lockedNotice": "협업이 시작되거나 종료된 시그널은 기록 보호를 위해 수정·삭제할 수 없어요."
+  },
   "signalDetail": {
     "title": "시그널",
     "apply": "지원하기",
@@ -423,6 +458,13 @@
     "undecided": "미정",
     "recommendations": "추천 보러 가기",
     "mine": "내가 올린 시그널이에요",
+    "edit": "수정하기",
+    "delete": "삭제하기",
+    "deleteTitle": "시그널을 삭제할까요?",
+    "deleteDescription": "시그널과 아직 처리하지 않은 지원 내역이 함께 삭제돼요. 이 작업은 되돌릴 수 없어요.",
+    "deleteConfirm": "삭제하기",
+    "deleting": "삭제하는 중…",
+    "deleteFailed": "삭제하지 못했어요. 협업이 이미 시작됐는지 확인해 주세요.",
     "applySheetTitle": "지원하기",
     "applyMessagePlaceholder": "어떤 역할로 함께하고 싶은지 적어보세요.",
     "applyDone": "지원했어요. 수락되면 알림으로 알려드려요."

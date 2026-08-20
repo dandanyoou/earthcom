@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Button, Card, Chip } from "@/components/ui";
 import { api, formatKrw, type ParseData } from "@/lib/api";
 
-import { ScreenHeader, Sheet, useRequireAuth } from "./shared";
+import { LoadingBlock, ScreenHeader, Sheet, useRequireAuth } from "./shared";
 
 type RoleForm = { label: string; headcount: number | null; form_position: number };
 type Edits = {
@@ -31,7 +31,7 @@ const ROLE_ICONS = [
   </svg>,
 ];
 
-export function WriteScreen() {
+export function WriteScreen({ signalId }: { signalId?: string } = {}) {
   const ready = useRequireAuth();
   const t = useTranslations();
   const router = useRouter();
@@ -49,7 +49,45 @@ export function WriteScreen() {
   const [error, setError] = useState<string | null>(null);
   const [degraded, setDegraded] = useState(false);
   const [crisis, setCrisis] = useState<string | null>(null);
+  const [initializing, setInitializing] = useState(Boolean(signalId));
+  const [initialError, setInitialError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!ready || !signalId) return;
+    let active = true;
+    api
+      .signal(signalId)
+      .then((signal) => {
+        if (!active) return;
+        if (signal.status !== "DRAFT" && signal.status !== "OPEN") {
+          throw new Error(t("write.editLocked"));
+        }
+        setText(signal.raw_text);
+        setRoles(
+          signal.roles.map((role, index) => ({
+            label: role.label,
+            headcount: role.headcount,
+            form_position: index,
+          })),
+        );
+        setEdits({
+          duration_weeks: signal.duration_weeks,
+          compensation_is_paid: signal.compensation.is_paid,
+          compensation_amount_krw: signal.compensation.amount_minor,
+        });
+        setInitialError(null);
+      })
+      .catch((err: Error) => {
+        if (active) setInitialError(err.message);
+      })
+      .finally(() => {
+        if (active) setInitializing(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [ready, signalId, t]);
 
   // Debounced parse preview — "이렇게 이해했어요" updates as the user types.
   useEffect(() => {
@@ -80,6 +118,7 @@ export function WriteScreen() {
   }, [text, roles, ready]);
 
   if (!ready) return null;
+  if (initializing || initialError) return <LoadingBlock error={initialError} />;
 
   const duration = parse
     ? edits.duration_weeks !== undefined
@@ -139,6 +178,18 @@ export function WriteScreen() {
     setBusy(true);
     setError(null);
     try {
+      if (signalId) {
+        const signal = await api.updateSignal(signalId, {
+          raw_text: text,
+          roles_form: roles,
+          edits: edits as Record<string, unknown>,
+          inferred_confirmed: true,
+          license_acknowledged: licenseAck,
+          high_risk_acknowledged: highRiskAck,
+        });
+        router.replace(`/signals/${signal.id}`);
+        return;
+      }
       const signal = await api.createSignal({
         raw_text: text,
         roles_form: roles,
@@ -167,9 +218,9 @@ export function WriteScreen() {
   return (
     <div style={{ paddingBottom: 28 }}>
       <ScreenHeader
-        onBack={() => router.push("/home")}
-        subtitle={t("write.subtitle")}
-        title={t("write.title")}
+        onBack={() => router.push(signalId ? `/signals/${signalId}` : "/home")}
+        subtitle={t(signalId ? "write.editSubtitle" : "write.subtitle")}
+        title={t(signalId ? "write.editTitle" : "write.title")}
       />
       <div className="px" style={{ marginTop: 14 }}>
         <textarea
@@ -322,7 +373,9 @@ export function WriteScreen() {
         {error ? <div className="form-error">{error}</div> : null}
         <div style={{ marginTop: 14 }}>
           <Button disabled={!canSubmit} onClick={submit} type="button">
-            {busy ? t("write.submitting") : t("write.submit")}
+            {busy
+              ? t(signalId ? "write.saving" : "write.submitting")
+              : t(signalId ? "write.save" : "write.submit")}
           </Button>
         </div>
       </div>

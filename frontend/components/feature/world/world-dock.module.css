@@ -61,7 +61,7 @@
 }
 
 /* labels hide on very narrow screens so the dock stays a tidy pill */
-@media (max-width: 420px) {
+@media (max-width: 520px) {
   .label {
     display: none;
   }

@@ -10,7 +10,7 @@ import re
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.profiles.models import Profile
@@ -90,53 +90,35 @@ def _compensation_columns(parsed: dict) -> dict:
     }
 
 
-async def create_draft(
-    session: AsyncSession,
-    *,
-    requester: Profile,
-    raw_text: str,
-    roles_form: list[dict],
-    edits: dict | None = None,
-) -> Signal:
-    if not 1 <= len(raw_text.strip()) <= 4000:
-        raise ProductError(
-            code="SIGNAL_TEXT_LENGTH", message="text must be 1–4000 characters", status_code=422
-        )
-    moderation_status = moderation.check(raw_text)
-    parsed = _apply_edits(run_parse(raw_text, roles_form), edits or {})
-
-    signal = Signal(
-        requester_profile_id=requester.id,
-        signal_type=parsed["signal_type"],
-        raw_text=raw_text.strip(),
-        status="DRAFT",
-        moderation_status=moderation_status,
-        matching_mode="RECRUITMENT" if parsed["signal_type"] == "CIRCLE" else "MATCH",
-        visibility="PUBLIC",
-        source_language=parsed["source_language"],
-        urgency=parsed["urgency"],
-        requires_physical_presence=parsed["location_requirement"]["requires_physical_presence"],
-        area_hint=parsed["location_requirement"]["area_hint"],
-        location_city_code=None,
-        target_is_team=parsed["team_shape"]["target_is_team"],
-        team_cardinality=parsed["team_shape"]["cardinality"],
-        headcount_hint=parsed["team_shape"]["headcount_hint"],
-        duration_weeks=parsed["duration"]["weeks"],
-        duration_origin=parsed["duration"]["origin"] if parsed["duration"]["origin"] else "NONE",
-        license_risk_flagged=parsed["license_risk"]["flagged"],
-        license_risk_kind=parsed["license_risk"]["kind"],
-        required_credentials=parsed["required_credentials"],
-        policy_snapshot={
+def _parsed_signal_columns(raw_text: str, parsed: dict) -> dict:
+    return {
+        "signal_type": parsed["signal_type"],
+        "raw_text": raw_text.strip(),
+        "moderation_status": moderation.check(raw_text),
+        "matching_mode": "RECRUITMENT" if parsed["signal_type"] == "CIRCLE" else "MATCH",
+        "source_language": parsed["source_language"],
+        "urgency": parsed["urgency"],
+        "requires_physical_presence": parsed["location_requirement"]["requires_physical_presence"],
+        "area_hint": parsed["location_requirement"]["area_hint"],
+        "target_is_team": parsed["team_shape"]["target_is_team"],
+        "team_cardinality": parsed["team_shape"]["cardinality"],
+        "headcount_hint": parsed["team_shape"]["headcount_hint"],
+        "duration_weeks": parsed["duration"]["weeks"],
+        "duration_origin": parsed["duration"]["origin"] or "NONE",
+        "license_risk_flagged": parsed["license_risk"]["flagged"],
+        "license_risk_kind": parsed["license_risk"]["kind"],
+        "required_credentials": parsed["required_credentials"],
+        "policy_snapshot": {
             "parse_schema_version": m1.SCHEMA_VERSION,
             "disclaimers": moderation.disclaimers_for(
                 parsed["required_credentials"], parsed["signal_type"], parsed["urgency"]
             ),
         },
         **_compensation_columns(parsed),
-    )
-    session.add(signal)
-    await session.flush()
+    }
 
+
+def _add_parsed_children(session: AsyncSession, signal: Signal, parsed: dict) -> None:
     for role in parsed["roles_requested"]:
         session.add(
             SignalRole(
@@ -160,6 +142,32 @@ async def create_draft(
                 confirmation_status="PENDING" if skill["origin"] == "INFERRED" else "NOT_REQUIRED",
             )
         )
+
+
+async def create_draft(
+    session: AsyncSession,
+    *,
+    requester: Profile,
+    raw_text: str,
+    roles_form: list[dict],
+    edits: dict | None = None,
+) -> Signal:
+    if not 1 <= len(raw_text.strip()) <= 4000:
+        raise ProductError(
+            code="SIGNAL_TEXT_LENGTH", message="text must be 1–4000 characters", status_code=422
+        )
+    parsed = _apply_edits(run_parse(raw_text, roles_form), edits or {})
+
+    signal = Signal(
+        requester_profile_id=requester.id,
+        status="DRAFT",
+        visibility="PUBLIC",
+        location_city_code=None,
+        **_parsed_signal_columns(raw_text, parsed),
+    )
+    session.add(signal)
+    await session.flush()
+    _add_parsed_children(session, signal, parsed)
     return signal
 
 
@@ -170,16 +178,9 @@ def _has_unconfirmed_inference(signal: Signal) -> bool:
     return inferred_fields and signal.inference_confirmed_at is None
 
 
-async def publish(
+async def _validate_publishable(
     session: AsyncSession, signal: Signal, *, requester: Profile, confirmations: dict
-) -> Signal:
-    """Publish gate — every condition must hold before DRAFT → OPEN (§6.4)."""
-    if signal.status != "DRAFT":
-        raise ProductError(
-            code="SIGNAL_INVALID_TRANSITION",
-            message="only drafts can be published",
-            status_code=409,
-        )
+) -> None:
     if requester.status != "ACTIVE":
         raise ProductError(
             code="PROFILE_NOT_ACTIVE", message="profile is not active", status_code=422
@@ -234,10 +235,105 @@ async def publish(
             status_code=422,
         )
 
+
+async def publish(
+    session: AsyncSession, signal: Signal, *, requester: Profile, confirmations: dict
+) -> Signal:
+    """Publish gate — every condition must hold before DRAFT → OPEN (§6.4)."""
+    if signal.status != "DRAFT":
+        raise ProductError(
+            code="SIGNAL_INVALID_TRANSITION",
+            message="only drafts can be published",
+            status_code=409,
+        )
+    await _validate_publishable(session, signal, requester=requester, confirmations=confirmations)
+
+    now = datetime.now(UTC)
     signal.status = "OPEN"
     signal.published_at = now
     signal.version += 1
     return signal
+
+
+async def update_owned(
+    session: AsyncSession,
+    signal: Signal,
+    *,
+    requester: Profile,
+    raw_text: str,
+    roles_form: list[dict],
+    edits: dict | None = None,
+    confirmations: dict | None = None,
+) -> Signal:
+    if signal.status not in ("DRAFT", "OPEN"):
+        raise ProductError(
+            code="SIGNAL_LOCKED",
+            message="a signal cannot be edited after collaboration starts",
+            status_code=409,
+        )
+    if not 1 <= len(raw_text.strip()) <= 4000:
+        raise ProductError(
+            code="SIGNAL_TEXT_LENGTH", message="text must be 1–4000 characters", status_code=422
+        )
+
+    parsed = _apply_edits(run_parse(raw_text, roles_form), edits or {})
+    for column, value in _parsed_signal_columns(raw_text, parsed).items():
+        setattr(signal, column, value)
+    signal.inference_confirmed_at = None
+    signal.license_risk_acknowledged_at = None
+    signal.high_risk_acknowledged_at = None
+
+    await session.execute(delete(SignalRole).where(SignalRole.signal_id == signal.id))
+    await session.execute(delete(SignalSkill).where(SignalSkill.signal_id == signal.id))
+    _add_parsed_children(session, signal, parsed)
+    signal.version += 1
+    await session.flush()
+
+    if signal.status == "OPEN":
+        await _validate_publishable(
+            session,
+            signal,
+            requester=requester,
+            confirmations=confirmations or {},
+        )
+    return signal
+
+
+async def delete_owned(session: AsyncSession, signal: Signal) -> None:
+    if signal.status not in ("DRAFT", "OPEN"):
+        raise ProductError(
+            code="SIGNAL_LOCKED",
+            message="a signal cannot be deleted after collaboration starts",
+            status_code=409,
+        )
+
+    # Applications are cascade-deleted with the signal. Remove their loose
+    # notification references as well so an inbox never points to a missing row.
+    from app.domains.collaborations.models import Application, Collaboration
+    from app.domains.notifications.models import Notification
+
+    collaboration_id = (
+        await session.execute(select(Collaboration.id).where(Collaboration.signal_id == signal.id))
+    ).scalar_one_or_none()
+    if collaboration_id is not None:
+        raise ProductError(
+            code="SIGNAL_LOCKED",
+            message="a signal linked to a collaboration cannot be deleted",
+            status_code=409,
+        )
+    application_ids = list(
+        (
+            await session.execute(select(Application.id).where(Application.signal_id == signal.id))
+        ).scalars()
+    )
+    if application_ids:
+        await session.execute(
+            delete(Notification).where(
+                Notification.resource_type == "application",
+                Notification.resource_id.in_(application_ids),
+            )
+        )
+    await session.delete(signal)
 
 
 async def get_owned(session: AsyncSession, signal_id: UUID, profile_id: UUID) -> Signal:

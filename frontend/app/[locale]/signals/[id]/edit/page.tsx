@@ -1,9 +1,9 @@
 import { setRequestLocale } from "next-intl/server";
 
 import { AppShell } from "@/components/shell/app-shell";
-import { SignalDetailScreen } from "@/components/screens/signal-detail-screen";
+import { WriteScreen } from "@/components/screens/write-screen";
 
-export default async function Page({
+export default async function EditSignalPage({
   params,
 }: {
   params: Promise<{ locale: string; id: string }>;
@@ -13,7 +13,7 @@ export default async function Page({
 
   return (
     <AppShell activeTab="signals">
-      <SignalDetailScreen signalId={id} />
+      <WriteScreen signalId={id} />
     </AppShell>
   );
 }

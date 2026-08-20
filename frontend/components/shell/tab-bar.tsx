@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 
 import { NavigationIcon, type NavigationIconName } from "./icons";
 
-export type TabId = "home" | "find" | "crew" | "history";
+export type TabId = "home" | "find" | "signals" | "crew" | "history";
 
 export const tabs: ReadonlyArray<{
   id: TabId;
@@ -13,6 +13,7 @@ export const tabs: ReadonlyArray<{
 }> = [
   { id: "home", href: "/world", icon: "home" },
   { id: "find", href: "/find", icon: "search" },
+  { id: "signals", href: "/signals", icon: "signal" },
   { id: "crew", href: "/chat", icon: "crew" },
   { id: "history", href: "/done", icon: "history" },
 ];

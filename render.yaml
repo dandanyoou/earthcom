@@ -1,0 +1,64 @@
+services:
+  - type: web
+    name: pangaea-api
+    runtime: docker
+    plan: free
+    region: singapore
+    repo: https://github.com/dandanyoou/earthcom
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health/live
+    autoDeployTrigger: commit
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pangaea-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: pangaea-redis
+          property: connectionString
+      - key: FRONTEND_ORIGINS
+        sync: false
+      - key: AI_MODE
+        value: stub
+      - key: TRANSLATE_PROVIDER
+        value: stub
+      - key: DEPOSIT_PROVIDER
+        value: sandbox
+      - key: DEPOSIT_PRODUCTION_ENABLED
+        value: "false"
+      - key: DEPOSIT_FORFEITURE_ENABLED
+        value: "false"
+      - key: JWT_SIGNING_KEY
+        generateValue: true
+      - key: RATE_LIMIT_PEPPER
+        generateValue: true
+      - key: ACCESS_TOKEN_TTL_SECONDS
+        value: "900"
+      - key: REFRESH_TOKEN_TTL_DAYS
+        value: "30"
+      - key: REFRESH_COOKIE_NAME
+        value: pangaea_refresh
+      - key: REFRESH_COOKIE_SECURE
+        value: "true"
+
+  - type: keyvalue
+    name: pangaea-redis
+    plan: free
+    region: singapore
+    ipAllowList: []
+    maxmemoryPolicy: allkeys-lru
+
+databases:
+  - name: pangaea-postgres
+    databaseName: pangaea
+    user: pangaea
+    plan: free
+    region: singapore
+    postgresMajorVersion: "16"
+    ipAllowList: []

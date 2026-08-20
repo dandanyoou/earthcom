@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export type NavigationIconName = "home" | "search" | "crew" | "history";
+export type NavigationIconName = "home" | "search" | "signal" | "crew" | "history";
 
 export function NavigationIcon({
   name,
@@ -31,6 +31,18 @@ export function NavigationIcon({
         <circle cx="16.5" cy="9.5" r="2.6" />
         <path d="M3 19c0-3 2.5-4.8 5.5-4.8S14 16 14 19" />
         <path d="M15.5 14.4c2.7.2 4.5 1.9 4.5 4.6" />
+      </svg>
+    );
+  }
+
+  if (name === "signal") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+        <circle cx="12" cy="12" r="2.2" />
+        <path d="M7.8 16.2a6 6 0 0 1 0-8.4" />
+        <path d="M16.2 7.8a6 6 0 0 1 0 8.4" />
+        <path d="M4.6 19.4a10.5 10.5 0 0 1 0-14.8" />
+        <path d="M19.4 4.6a10.5 10.5 0 0 1 0 14.8" />
       </svg>
     );
   }

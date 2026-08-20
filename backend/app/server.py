@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 import uvicorn
@@ -19,7 +20,8 @@ def create_server(
 
 
 def run() -> None:
-    create_server().run()
+    port = int(os.environ.get("PORT", "8000"))
+    create_server(port=port).run()
 
 
 if __name__ == "__main__":

@@ -69,6 +69,11 @@ export type Signal = {
   accept_latency_seconds: number | null;
   member_faces: { initials: string; palette: number }[];
 };
+export type SignalMutation = {
+  raw_text: string;
+  roles_form: { label: string; headcount: number | null; form_position: number }[];
+  edits?: Record<string, unknown>;
+};
 export type ParseData = {
   signal_type: string;
   urgency: string;
@@ -369,11 +374,17 @@ export const api = {
       method: "POST",
       body: { raw_text, roles_form },
     }),
-  createSignal: (body: {
-    raw_text: string;
-    roles_form: { label: string; headcount: number | null; form_position: number }[];
-    edits?: Record<string, unknown>;
-  }) => request<Signal>("/api/v1/signals", { method: "POST", body }),
+  createSignal: (body: SignalMutation) =>
+    request<Signal>("/api/v1/signals", { method: "POST", body }),
+  updateSignal: (
+    id: string,
+    body: SignalMutation & {
+      inferred_confirmed: boolean;
+      license_acknowledged: boolean;
+      high_risk_acknowledged: boolean;
+    },
+  ) => request<Signal>(`/api/v1/signals/${id}`, { method: "PATCH", body }),
+  deleteSignal: (id: string) => request<void>(`/api/v1/signals/${id}`, { method: "DELETE" }),
   publishSignal: (id: string, confirmations: Record<string, boolean>) =>
     request<Signal>(`/api/v1/signals/${id}/publish`, { method: "POST", body: confirmations }),
   signal: (id: string) => request<Signal>(`/api/v1/signals/${id}`),

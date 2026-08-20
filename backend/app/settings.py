@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import SecretStr, model_validator
+from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 LOCAL_DEVELOPMENT_JWT_SIGNING_KEY = "pangaea-local-development-signing-key"
@@ -35,6 +35,18 @@ class Settings(BaseSettings):
     refresh_token_ttl_days: int = 30
     refresh_cookie_name: str = "pangaea_refresh"
     refresh_cookie_secure: bool = False
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url(cls, value: object) -> object:
+        """Use psycopg's SQLAlchemy dialect for provider-issued Postgres URLs."""
+        if not isinstance(value, str):
+            return value
+        if value.startswith("postgres://"):
+            return value.replace("postgres://", "postgresql+psycopg://", 1)
+        if value.startswith("postgresql://"):
+            return value.replace("postgresql://", "postgresql+psycopg://", 1)
+        return value
 
     @model_validator(mode="after")
     def validate_production_auth_settings(self) -> "Settings":

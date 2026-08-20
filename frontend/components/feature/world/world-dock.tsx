@@ -3,7 +3,7 @@
 // A glassy floating dock for the globe/village world. The app's default
 // .tab-bar is a solid white bar that reads as a foreign panel over the dark
 // globe; this one is translucent and rounded so it sits ON the world rather
-// than under it. Same four destinations (홈·찾기·크루·기록).
+// than under it. Same destinations as the app navigation.
 
 import { useTranslations } from "next-intl";
 

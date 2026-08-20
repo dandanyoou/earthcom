@@ -4,7 +4,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,6 +39,12 @@ class SignalCreate(BaseModel):
     raw_text: str = Field(min_length=1, max_length=4000)
     roles_form: list[RoleForm] = Field(default_factory=list, max_length=8)
     edits: dict = Field(default_factory=dict)
+
+
+class SignalUpdate(SignalCreate):
+    inferred_confirmed: bool = False
+    license_acknowledged: bool = False
+    high_risk_acknowledged: bool = False
 
 
 class PublishInput(BaseModel):
@@ -193,6 +199,46 @@ async def signal_detail(
             code="ACTING_PROFILE_FORBIDDEN", message="draft is private", status_code=403
         )
     return ok(await _signal_payload(session, signal, settings))
+
+
+@router.patch("/signals/{signal_id}")
+async def update_signal(
+    signal_id: UUID,
+    body: SignalUpdate,
+    session: SessionDep,
+    identity: IdentityDep,
+    settings: SettingsDep,
+):
+    profile = require_profile(identity)
+    signal = await signals_service.get_owned(session, signal_id, profile.id)
+    await signals_service.update_owned(
+        session,
+        signal,
+        requester=profile,
+        raw_text=body.raw_text,
+        roles_form=[role.model_dump() for role in body.roles_form],
+        edits=body.edits,
+        confirmations={
+            "inferred_confirmed": body.inferred_confirmed,
+            "license_acknowledged": body.license_acknowledged,
+            "high_risk_acknowledged": body.high_risk_acknowledged,
+        },
+    )
+    await session.commit()
+    return ok(await _signal_payload(session, signal, settings))
+
+
+@router.delete("/signals/{signal_id}", status_code=204)
+async def delete_signal(
+    signal_id: UUID,
+    session: SessionDep,
+    identity: IdentityDep,
+) -> Response:
+    profile = require_profile(identity)
+    signal = await signals_service.get_owned(session, signal_id, profile.id)
+    await signals_service.delete_owned(session, signal)
+    await session.commit()
+    return Response(status_code=204)
 
 
 @router.post("/signals/{signal_id}/publish")
